@@ -22,48 +22,107 @@
  * SOFTWARE.
  */
 
+import java.io.Serializable;
 import java.util.*;
 
-public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, RandomAccess {
+public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, Serializable {
 
   public List<FixedDeque<E>> data; // data is stored as a list of lists (array of arrays).
   private int capacity; // total capacity of the IgushArray
   private int size; // the current size of IgushArray, not the same as capacity
-  private int deqSize; // size of each ArrayDeque in the list
-  private int listSize; // size of the list containing references to the ArrayDeques
-  private int lastDeqSize; // == capacity % deqSize;
+  private int deqCapacity; // capacity of each ArrayDeque in the list
+  private int listCapacity; // capacity of the list containing references to the ArrayDeques
+  private int lastDeqCapacity; // capacity of the final deq
   /*
    * To ensure O(1) access time, each list in the data list is implemented with ArrayList, not ArrayDeque.
    */
 
-  public IgushArray(int capacity) {
+  /**
+   * Constructs an empty IgushArray with initial capacity of 10
+   */
+  public IgushArray() {
+    this(10);
+  }
 
-    this.capacity = capacity;
-    deqSize = (int) Math.pow(capacity, 0.5);
-    lastDeqSize = capacity % deqSize;
-    listSize = (int) Math.ceil((double) capacity / deqSize);
+  /**
+   * Constructs an empty IgushArray with the specified initial capacity.
+   *
+   * @param initialCapacity
+   * @throws IllegalArgumentException if the specified initial capacity
+   *                                  is negative
+   */
+  public IgushArray(int initialCapacity) {
+    capacity = initialCapacity;
+    if (capacity < 0)
+      throw new IllegalArgumentException("Illegal Capacity: " + capacity);
 
-    /* System.out.println("New Igush Array: \nCapacity: " + capacity +
-            " | listSize: " + listSize +
-            " | deqSize: " + deqSize +
-            " | lastDeqSize: " + lastDeqSize);
+    deqCapacity = (int) Math.pow(capacity, 0.5);
+    lastDeqCapacity = capacity % deqCapacity;
+    listCapacity = (int) Math.ceil((double) capacity / deqCapacity);
+
+    /*
+    System.out.println("New Igush Array: \nCapacity: " + capacity +
+            " | listCapacity: " + listCapacity +
+            " | deqCapacity: " + deqCapacity +
+            " | lastDeqCapacity: " + lastDeqCapacity);
+
     */
-
-    data = new ArrayList<>(listSize);
-    for (int i = 0; i < listSize - 1; i++) {
-      data.add(new FixedDeque<E>(deqSize));
+    data = new ArrayList<>(listCapacity);
+    for (int i = 0; i < listCapacity - 1; i++) {
+      data.add(new FixedDeque<E>(deqCapacity));
     }
-    if (lastDeqSize != 0) {
-      data.add(new FixedDeque<E>(lastDeqSize));
+    if (lastDeqCapacity != 0) {
+      data.add(new FixedDeque<E>(lastDeqCapacity));
     } else {
-      data.add(new FixedDeque<E>(deqSize));
+      data.add(new FixedDeque<E>(deqCapacity));
     }
     size = 0;
 
   }
 
-  // initialize IgushArray with an existing Arraylist
-  public IgushArray(ArrayList<E> arr) {
+  /**
+   * Constructs a IgushArray containing the elements of the specified
+   * collection, in the order they are returned by the collection's iterator
+   * The capacity is by default set equal to the collection size
+   *
+   * @param c the collection whose elements are to be placed into this list
+   * @throws NullPointerException if the specified collection is null
+   */
+  public IgushArray(Collection<? extends E> c) {
+    this(c.size());
+    Iterator<?> itr = c.iterator();
+    while (itr.hasNext()) {
+      add((E) itr.next());
+    }
+  }
+
+  /**
+   * Constructs a IgushArray of the specified capacity containing the elements of the specified
+   * collection, in the order they are returned by the collection's iterator
+   *
+   * @param c the collection whose elements are to be placed into this list
+   * @throws NullPointerException     if the specified collection is null
+   * @throws IllegalArgumentException if the specified capacity is not enough to contain the
+   *                                  collection passed
+   */
+  public IgushArray(Collection<? extends E> c, int initialCapacity) {
+    this(initialCapacity);
+    Iterator<?> itr = c.iterator();
+    if (capacity < size)
+      throw new IllegalArgumentException("Capacity of " + capacity + "is not enough to contain the collection");
+
+    while (itr.hasNext()) {
+      add((E) itr.next());
+    }
+  }
+
+  /**
+   * FIXME
+   * Trims the capacity of this <tt>IgushArray</tt> instance to be the
+   * list's current size.  An application can use this operation to minimize
+   * the storage of an <tt>IgushArray</tt> instance.
+   */
+  public void trimToSize() {
 
   }
 
@@ -77,9 +136,19 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
   }
 
   /**
+   * Increases the capacity of this IgushArray instance, if necessary, to ensure that it can hold
+   * at least the number of elements specified by the minimum capacity argument. Akin to ArrayList's same method
+   *
+   * @param minCapacity
+   */
+  public void ensureCapacity(int minCapacity) {
+
+  }
+
+  /**
    * Returns the size of the IgushArray, which is the number of elements stored in this collection
    *
-   * @return
+   * @return the number of elements in this IgushArray
    */
   @Override
   public int size() {
@@ -89,7 +158,7 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
   /**
    * Returns whether the IgushArray is empty or not
    *
-   * @return
+   * @return true if the IgushArray is empty
    */
   @Override
   public boolean isEmpty() {
@@ -102,12 +171,69 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
   /**
    * Returns whether or not an instance of o is in this IgushArray
    *
-   * @param o
-   * @return
+   * @param o element whose presence in this IgushArray is to be tested
+   * @return true if the element is present in the IgushArray
    */
   @Override
   public boolean contains(Object o) {
     return indexOf(o) >= 0;
+  }
+
+  /**
+   * Returns the index of the first occurrence of the specified element in
+   * the IgushArray instance.
+   *
+   * @param o element whose index in this IgushArray is to be found
+   * @return index of the element found or -1 if there is no such index
+   */
+  @Override
+  public int indexOf(Object o) {
+    ListIterator<E> itr = listIterator();
+    if (o == null) {
+      while (itr.hasNext()) {
+        if (itr.next() == null)
+          return itr.previousIndex();
+      }
+    } else {
+      while (itr.hasNext()) {
+        if (o.equals(itr.next()))
+          return itr.previousIndex();
+      }
+    }
+    return -1;
+  }
+
+  @Override
+  public int lastIndexOf(Object o) {
+    ListIterator<E> itr = listIterator(size());
+    if (o == null) {
+      while (itr.hasPrevious()) {
+        if (itr.previous() == null)
+          return itr.nextIndex();
+      }
+    } else {
+      while (itr.hasPrevious()) {
+        if (o.equals(itr.previous()))
+          return itr.nextIndex();
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Returns a shallow copy of this IgushArray instance.  (The
+   * elements themselves are not copied.) FIXME
+   *
+   * @return a clone of this IgushArray instance
+   */
+  public Object clone() {
+    try {
+      IgushArray<?> v = (IgushArray<?>) super.clone();
+      return v;
+    } catch (CloneNotSupportedException e) {
+      // shouldn't happen
+      throw new InternalError(e);
+    }
   }
 
   /**
@@ -120,19 +246,34 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
     return listIterator();
   }
 
+  //FIXME ADD DOCUMENTATION
   @Override
   public Object[] toArray() {
-    return new Object[0];
+    Object[] a = new Object[size];
+    ListIterator<E> itr = listIterator();
+    while (itr.hasNext()) {
+      a[itr.nextIndex()] = itr.next();
+    }
+    return a;
   }
 
+  /*FIXME ADD DOCUMENTATION. PROBABLY INCORRECT IMPLEMENTATION
+   */
   @Override
   public <T> T[] toArray(T[] a) {
-    return null;
+    T[] arr = (T[]) new Object[size()];
+
+    ListIterator<E> itr = listIterator();
+    while (itr.hasNext()) {
+      arr[itr.nextIndex()] = (T) itr.next();
+    }
+
+    return arr;
   }
 
   private void rangeCheck(int index) {
     // Attempting to access an index outside of the allocated memory
-    if (index >= capacity)
+    if (index >= size)
       throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
   }
 
@@ -143,79 +284,7 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
   }
 
   private String outOfBoundsMsg(int index) {
-    return "Index: " + index + ", Size: " + size;
-  }
-
-  /**
-   * Adds an element to the end of the IgushArray. The IgushArray will automatically allocate more memory
-   * for the array if there isn't enough capacity. By default... it expands by a factor of FIXME
-   *
-   * @param e The element to add
-   * @return
-   */
-  @Override
-  // will also automatically reallocate memory if size reaches capacity
-  public boolean add(E e) {
-    if (size() < capacity) {
-      int listIndex = (int) (size() / deqSize);
-      int deqIndex = size() % deqSize;
-      data.get(listIndex).add(e);
-      size++;
-      return true;
-    } else {
-      //we reach capacity, we need to expand the capacities of the deques.
-      // NOT RECOMMENDED TO OCCUR
-    }
-    return false;
-  }
-
-  /**
-   * Removes the first instance of the object FIXME
-   *
-   * @param o
-   * @return
-   */
-  @Override
-  public boolean remove(Object o) {
-    return false;
-  }
-
-  @Override
-  public boolean containsAll(Collection<?> c) {
-    return false;
-  }
-
-  @Override
-  public boolean addAll(Collection<? extends E> c) {
-    return false;
-  }
-
-  @Override
-  public boolean addAll(int index, Collection<? extends E> c) {
-    return false;
-  }
-
-  @Override
-  public boolean removeAll(Collection<?> c) {
-    return false;
-  }
-
-  @Override
-  public boolean retainAll(Collection<?> c) {
-    return false;
-  }
-
-  /**
-   * Removes all of the elements from this IgushArray.
-   * The list will be empty after this call returns
-   */
-  @Override
-  public void clear() {
-    for (int i = 0; i < listSize; i++) {
-      data.get(i).clear();
-      ;
-    }
-    size = 0;
+    return "Index: " + index + ", Size: " + size + ", Capacity: " + capacity;
   }
 
   /**
@@ -228,8 +297,8 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
   public E get(int index) {
     rangeCheck(index);
 
-    int listIndex = (int) (index / deqSize);
-    int deqIndex = index % deqSize;
+    int listIndex = (int) (index / deqCapacity);
+    int deqIndex = index % deqCapacity;
     return data.get(listIndex).get(deqIndex);
   }
 
@@ -243,10 +312,33 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
    */
   @Override
   public E set(int index, E element) {
-    int listIndex = (int) (index / deqSize);
-    int deqIndex = index % deqSize;
+    int listIndex = (int) (index / deqCapacity);
+    int deqIndex = index % deqCapacity;
 
     return data.get(listIndex).set(deqIndex, element);
+  }
+
+  /**
+   * Adds an element to the end of the IgushArray. The IgushArray will automatically allocate more memory
+   * for the array if there isn't enough capacity. By default... it expands by a factor of FIXME
+   *
+   * @param e The element to add
+   * @return
+   */
+  @Override
+  //FIXME will also automatically reallocate memory if size reaches capacity
+  public boolean add(E e) {
+    if (size() < capacity) {
+      int listIndex = (int) (size() / deqCapacity);
+      int deqIndex = size() % deqCapacity;
+      data.get(listIndex).add(e);
+      size++;
+      return true;
+    } else {
+      //we reach capacity, we need to expand the capacities of the deques.
+      // NOT RECOMMENDED TO OCCUR
+    }
+    return false;
   }
 
   /**
@@ -259,8 +351,8 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
   public void add(int index, E element) {
     rangeCheckForAdd(index);
 
-    int listIndex = index / deqSize;
-    int deqIndex = index % deqSize;
+    int listIndex = index / deqCapacity;
+    int deqIndex = index % deqCapacity;
     FixedDeque<E> deque = data.get(listIndex);
     if (!deque.fixedAdd(deqIndex, element)) {
       // if fail to add, then deque must be full
@@ -270,14 +362,99 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
       deque.fixedAdd(deqIndex, element);
       shiftUp(listIndex + 1, removedElement);
 
+    } else {
+      //FIXME increase capacity
     }
 
     size++;
   }
 
+  /**
+   * Removes the element stored in the specified position in the IgushArray
+   * @param index of the element to remove
+   * @return the element that was removed
+   */
+  @Override
+  public E remove(int index) {
+    rangeCheck(index);
+    int listIndex = index / deqCapacity;
+    int deqIndex = index % deqCapacity;
+    FixedDeque<E> deque = data.get(listIndex);
+    E removedElement = deque.remove(deqIndex);
+    shiftDown(listIndex + 1);
+    size--;
+    return removedElement;
+  }
+
+  /**
+   * Removes the first instance of the specified object in the IgushArray
+   * FIXME DOCUMENTATION
+   *
+   * @param o the instance of the element to remove
+   * @return true if it is successfully removed
+   */
+  @Override
+  public boolean remove(Object o) {
+    //FIXME can improve performance by using a no bounds checked remove operation
+
+    remove(indexOf(o));
+    return true;
+  }
+
+  /**
+   * Removes all of the elements from this IgushArray.
+   * The list will be empty after this call returns
+   */
+  @Override
+  public void clear() {
+    for (int i = 0; i < listCapacity; i++) {
+      data.get(i).clear();
+      ;
+    }
+    size = 0;
+  }
+
+
+  @Override
+  public boolean addAll(Collection<? extends E> c) {
+    //FIXME
+    return false;
+  }
+
+  @Override
+  public boolean addAll(int index, Collection<? extends E> c) {
+    //FIXME
+    return false;
+  }
+
+  @Override
+  public boolean removeAll(Collection<?> c) {
+    //FIXME
+    return false;
+  }
+
+  @Override
+  public boolean retainAll(Collection<?> c) {
+    //FIXME
+    return false;
+  }
+
+  @Override
+  public boolean containsAll(Collection<?> c) {
+    return false;
+  }
+
+  //FIXME might not be right
+  @Override
+  protected void removeRange(int fromIndex, int toIndex) {
+    for (int i = fromIndex; i <= toIndex; i++) {
+      remove(fromIndex);
+    }
+  }
+
   // Only used when we add/insert an element usually
   private void shiftUp(int listIndex, E frontElement) {
-    while (listIndex < listSize) {
+    while (listIndex < listCapacity) {
       FixedDeque<E> deque = data.get(listIndex);
 
       // We shiftUp the deque if they are full, otherwise we just add to the final non full deque and stop the
@@ -292,11 +469,9 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
     }
   }
 
-  //FIXME
-  // Only used when we remove/erase an element usually
   private void shiftDown(int listIndex) {
     E endElement;
-    int currListIndex = (int) Math.ceil((double) size() / deqSize - 1); //FIXME this could be done better
+    int currListIndex = (int) Math.ceil((double) size() / deqCapacity - 1); //FIXME this could be done better
     if (currListIndex == 0)
       return;
     FixedDeque<E> deque = data.get(currListIndex);
@@ -314,53 +489,6 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
 
     deque = data.get(currListIndex);
     deque.add(endElement);
-    int k;
-    //deque.shiftDown(endElement);
-
-  }
-
-  @Override
-  public E remove(int index) {
-    rangeCheck(index);
-    int listIndex = index / deqSize;
-    int deqIndex = index % deqSize;
-    FixedDeque<E> deque = data.get(listIndex);
-    E removedElement = deque.remove(deqIndex);
-    shiftDown(listIndex + 1);
-    size--;
-    return removedElement;
-  }
-
-  /**
-   * Increases the capacity of this IgushArray instance, if necessary, to ensure that it can hold
-   * at least the number of elements specified by the minimum capacity argument. Akin to ArrayList's same method
-   *
-   * @param minCapacity
-   */
-  public void ensureCapacity(int minCapacity) {
-
-  }
-
-
-  @Override
-  public int indexOf(Object o) {
-    // in the future, use listIterator to find it.
-
-    if (o == null) {
-      for (int i = 0; i < capacity; i++)
-        if (data.get(i) == null)
-          return i;
-    } else {
-      for (int i = 0; i < capacity; i++)
-        if (o.equals(data.get(i)))
-          return i;
-    }
-    return -1;
-  }
-
-  @Override
-  public int lastIndexOf(Object o) {
-    return 0;
   }
 
   @Override
@@ -373,15 +501,38 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
     return new ListIteratorPrototype(index);
   }
 
+  // FIXME, look at how ArrayList implements this
+  // FIXME DOCUMENTATION
+
+  /**
+   *
+   * @param fromIndex
+   * @param toIndex
+   * @return
+   */
   @Override
   public List<E> subList(int fromIndex, int toIndex) {
-    return null;
+    int newSize = toIndex - fromIndex;
+    List<E> subArr = new IgushArray<E>(newSize);
+
+    ListIterator<E> itr = listIterator();
+    while (itr.hasNext()) {
+      subArr.add(itr.next());
+    }
+    return subArr;
   }
 
-  public List<ArrayDeque<E>> subIgushList(int fromIndex, int toIndex) {
+  //FIXME forEach method?
 
-    return null;
+  //FIXME sort method?
+  /**
+   *
+   * @param c the comparator to use to sort the IgushArray
+
+  public void sort(Comparator<? super E> c) {
+    Collections.sort(this, c);
   }
+  */
 
   /**
    * Returns the string representation of the contents of the IgushArray
@@ -470,7 +621,7 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
 
     @Override
     public void set(E e) {
-      IgushArray.this.set(cursor, e);
+      IgushArray.this.set(lastRet, e);
     }
 
     @Override

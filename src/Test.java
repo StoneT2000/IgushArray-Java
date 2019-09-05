@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 
+import java.io.*;
 import java.util.*;
 
 public class Test {
 
 
-  public static void main(String args[]) {
+  public static void main(String args[]) throws IOException {
 
     /*
     System.out.println("Test adding procedures");
@@ -62,13 +63,21 @@ public class Test {
     // Initialize IgushArray of capacity 1E6
     IgushArray<Integer> test = new IgushArray((int) (10 * 1E5));
     testPushFront(test, "IgushArray");
-
-
+    System.out.println(test.toString());
+    Collections.sort(test);
+    System.out.println(test.toString());
     System.out.println("Testing ArrayList Insertion At Index 0/Push Front/Unshift");
     // Initialize ArrayList of capacity 1E6
     ArrayList<Integer> testArrayList = new ArrayList<>((int) (10 * 1E5));
-    testPushFront(testArrayList, "ArrayList");
 
+
+    testPushFront(testArrayList, "ArrayList");
+    Collections.sort(testArrayList);
+    System.out.println(testArrayList.toString());
+
+
+
+    /*
     System.out.println();
     System.out.println("Testing IgushArray random access");
     testAccess(test, "IgushArray");
@@ -80,8 +89,8 @@ public class Test {
     testRemoveFront(test, "IgushArray");
     System.out.println("Testing ArrayList remove from front");
     testRemoveFront(testArrayList, "ArrayList");
+    */
 
-System.out.println("Size: " + test.size() + " | " + test.toString());
   }
 
   /**
@@ -92,7 +101,7 @@ System.out.println("Size: " + test.size() + " | " + test.toString());
   public static void testPushFront(List list, String name) {
     for (int i = 0; i < 10; i++) {
       long stime = System.currentTimeMillis();
-      for (int j = 0; j < 1E5; j++) {
+      for (int j = 0; j < 3; j++) {
         list.add(0, (int) (Math.random() * 20));
       }
       long ftime = System.currentTimeMillis();

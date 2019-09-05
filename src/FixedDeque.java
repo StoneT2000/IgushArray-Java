@@ -23,6 +23,7 @@
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A Fixed Deque implemented with a Ring/Circular Buffer. This is not a full implementation, to be only used with IgushArray
@@ -44,16 +45,7 @@ public class FixedDeque<E> extends ArrayList<E> {
 
   @Override
   public boolean add(E element) {
-    if (size() < capacity) {
-      super.add(end + 1, element);
-      if (end < begin) {
-        begin = (begin + 1) % size();
-      }
-      end = (end + 1) % size();
-      return true;
-    }
-
-    return false;
+    return fixedAdd(size(), element);
   }
 
   @Override
