@@ -81,3 +81,4 @@ Each FixedDeque is a fixed length Deque (Double Ended Queue) implemented as a Ci
 - Finish rewrite of all ArrayList methods
 - Finish stability test code to test all the IgushArray methods and logic and compare result to ArrayList
 - Construct graphs based on the data to show performance comparisons
+- Fine tune methods to improve speed (use some optimized private methods for internal calculations)
