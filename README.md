@@ -1,7 +1,7 @@
 # IgushArray-Java WIP
  An implementation of the [IgushArray](https://github.com/igushev/IgushArray) in Java, with **O(1)** access and **O(N^1/2)** insertion and removal
 
-The java implementation of the IgushArray is a one for one replacement for an ArrayList as it extendsextends **[AbstractList](https://docs.oracle.com/javase/8/docs/api/java/util/AbstractList.html)\<E>** and implements the same interfaces as ArrayList, namely **[Serializable](https://docs.oracle.com/javase/7/docs/api/java/io/Serializable.html), [Cloneable](https://docs.oracle.com/javase/7/docs/api/java/lang/Cloneable.html), [List](https://docs.oracle.com/javase/7/docs/api/java/util/List.html)\<E>, [RandomAccess](https://docs.oracle.com/javase/7/docs/api/java/util/RandomAccess.html)**
+The java implementation of the IgushArray is a one for one replacement for an ArrayList as it extends **[AbstractList](https://docs.oracle.com/javase/8/docs/api/java/util/AbstractList.html)\<E>** and implements the same interfaces as ArrayList, namely **[Serializable](https://docs.oracle.com/javase/7/docs/api/java/io/Serializable.html), [Cloneable](https://docs.oracle.com/javase/7/docs/api/java/lang/Cloneable.html), [List](https://docs.oracle.com/javase/7/docs/api/java/util/List.html)\<E>, [RandomAccess](https://docs.oracle.com/javase/7/docs/api/java/util/RandomAccess.html)**
 
 ## Overview
 
