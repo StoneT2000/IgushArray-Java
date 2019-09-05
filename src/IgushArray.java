@@ -43,20 +43,19 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
     lastDeqSize = capacity % deqSize;
     listSize = (int) Math.ceil((double) capacity / deqSize);
 
-    System.out.println("New Igush Array: \nCapacity: " + capacity +
+    /* System.out.println("New Igush Array: \nCapacity: " + capacity +
             " | listSize: " + listSize +
             " | deqSize: " + deqSize +
             " | lastDeqSize: " + lastDeqSize);
+    */
 
-    // Initialize the internal ArrayLists to null.
     data = new ArrayList<>(listSize);
     for (int i = 0; i < listSize - 1; i++) {
       data.add(new FixedDeque<E>(deqSize));
     }
     if (lastDeqSize != 0) {
       data.add(new FixedDeque<E>(lastDeqSize));
-    }
-    else {
+    } else {
       data.add(new FixedDeque<E>(deqSize));
     }
     size = 0;
@@ -68,17 +67,30 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
 
   }
 
-
-  // Returns the length of the internal array
-  public int length() {
-    return this.capacity;
+  /**
+   * Returns the current allocated capacity of the IgushArray
+   *
+   * @return
+   */
+  public int capacity() {
+    return capacity;
   }
 
+  /**
+   * Returns the size of the IgushArray, which is the number of elements stored in this collection
+   *
+   * @return
+   */
   @Override
   public int size() {
     return this.size;
   }
 
+  /**
+   * Returns whether the IgushArray is empty or not
+   *
+   * @return
+   */
   @Override
   public boolean isEmpty() {
     if (!data.isEmpty()) {
@@ -87,14 +99,25 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
     return true;
   }
 
+  /**
+   * Returns whether or not an instance of o is in this IgushArray
+   *
+   * @param o
+   * @return
+   */
   @Override
   public boolean contains(Object o) {
     return indexOf(o) >= 0;
   }
 
+  /**
+   * Return an Iterator object
+   *
+   * @return
+   */
   @Override
   public Iterator<E> iterator() {
-    return null;
+    return listIterator();
   }
 
   @Override
@@ -113,10 +136,23 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
       throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
   }
 
+  private void rangeCheckForAdd(int index) {
+    if (index > size() || index < 0) {
+      throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+  }
+
   private String outOfBoundsMsg(int index) {
     return "Index: " + index + ", Size: " + size;
   }
 
+  /**
+   * Adds an element to the end of the IgushArray. The IgushArray will automatically allocate more memory
+   * for the array if there isn't enough capacity. By default... it expands by a factor of FIXME
+   *
+   * @param e The element to add
+   * @return
+   */
   @Override
   // will also automatically reallocate memory if size reaches capacity
   public boolean add(E e) {
@@ -124,16 +160,21 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
       int listIndex = (int) (size() / deqSize);
       int deqIndex = size() % deqSize;
       data.get(listIndex).add(e);
-      size ++;
+      size++;
       return true;
-    }
-    else {
+    } else {
       //we reach capacity, we need to expand the capacities of the deques.
       // NOT RECOMMENDED TO OCCUR
     }
     return false;
   }
 
+  /**
+   * Removes the first instance of the object FIXME
+   *
+   * @param o
+   * @return
+   */
   @Override
   public boolean remove(Object o) {
     return false;
@@ -164,21 +205,42 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
     return false;
   }
 
+  /**
+   * Removes all of the elements from this IgushArray.
+   * The list will be empty after this call returns
+   */
   @Override
   public void clear() {
-
+    for (int i = 0; i < listSize; i++) {
+      data.get(i).clear();
+      ;
+    }
+    size = 0;
   }
 
+  /**
+   * Gets the element stored in the specified index of this IgushArray
+   *
+   * @param index
+   * @return
+   */
   @Override
   public E get(int index) {
     rangeCheck(index);
 
-    // find list index;
     int listIndex = (int) (index / deqSize);
     int deqIndex = index % deqSize;
     return data.get(listIndex).get(deqIndex);
   }
 
+  /**
+   * Replaces the element at the specified position in this IgushArray with
+   * specified element
+   *
+   * @param index   index of the element to replace
+   * @param element element to be stored at the specified position
+   * @return the element previously at the specified position
+   */
   @Override
   public E set(int index, E element) {
     int listIndex = (int) (index / deqSize);
@@ -188,18 +250,19 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
   }
 
   /**
-   * Adds (Inserts) element to the specified index into the IgushArray.
-   * @param index
-   * @param element
+   * Adds (Inserts) element to the specified position into the IgushArray. If capacity is exceeded, memory is auto reallocated FIXME
+   *
+   * @param index   position in the IgushArray to add the element
+   * @param element the element to add to the specified position
    */
   @Override
   public void add(int index, E element) {
-    rangeCheck(index);
+    rangeCheckForAdd(index);
 
     int listIndex = index / deqSize;
     int deqIndex = index % deqSize;
     FixedDeque<E> deque = data.get(listIndex);
-    if(! deque.fixedAdd(deqIndex, element)) {
+    if (!deque.fixedAdd(deqIndex, element)) {
       // if fail to add, then deque must be full
       //O(n^1/2) insertion process into N^1/2 capacity deque
       // remove end of the deque to give space for element and avoid expanding deque size
@@ -216,44 +279,56 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
   private void shiftUp(int listIndex, E frontElement) {
     while (listIndex < listSize) {
       FixedDeque<E> deque = data.get(listIndex);
-      //System.out.println("Shifting: " + deque.toString());
+
       // We shiftUp the deque if they are full, otherwise we just add to the final non full deque and stop the
       // shifting process
       if (deque.isFull()) {
         frontElement = deque.shiftUp(frontElement);
-      }
-      else {
+      } else {
         deque.fixedAdd(0, frontElement);
         break;
       }
-      //System.out.println("Res     : " + deque.toString());
       listIndex += 1;
     }
   }
 
   //FIXME
   // Only used when we remove/erase an element usually
-  private void shiftDown(int listIndex, E endElement) {
-    while (listIndex >= 0) {
-      FixedDeque<E> deque = data.get(listIndex);
-      System.out.println("Shift down: " + deque.toString());
-      // We shiftDown the deque if they are full, otherwise we just add to the final non full deque and stop the
-      // shifting process
-      if (deque.isFull()) {
-        endElement = deque.shiftDown(endElement);
-      }
-      else {
-        deque.fixedAdd(0, endElement);
-        break;
-      }
-      System.out.println("Res       : " + deque.toString());
-      listIndex -= 1;
+  private void shiftDown(int listIndex) {
+    E endElement;
+    int currListIndex = (int) Math.ceil((double) size() / deqSize - 1); //FIXME this could be done better
+    if (currListIndex == 0)
+      return;
+    FixedDeque<E> deque = data.get(currListIndex);
+    endElement = deque.remove(0);
+    currListIndex -= 1;
+
+    while (currListIndex >= listIndex) {
+      deque = data.get(currListIndex);
+
+      // Move the first element of the previous deque to the end of the current deque
+      endElement = deque.shiftDown(endElement);
+
+      currListIndex -= 1;
     }
+
+    deque = data.get(currListIndex);
+    deque.add(endElement);
+    int k;
+    //deque.shiftDown(endElement);
+
   }
 
   @Override
   public E remove(int index) {
-    return null;
+    rangeCheck(index);
+    int listIndex = index / deqSize;
+    int deqIndex = index % deqSize;
+    FixedDeque<E> deque = data.get(listIndex);
+    E removedElement = deque.remove(deqIndex);
+    shiftDown(listIndex + 1);
+    size--;
+    return removedElement;
   }
 
   /**
@@ -265,7 +340,6 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
   public void ensureCapacity(int minCapacity) {
 
   }
-
 
 
   @Override
@@ -291,12 +365,12 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
 
   @Override
   public ListIterator<E> listIterator() {
-    return null;
+    return new ListIteratorPrototype();
   }
 
   @Override
   public ListIterator<E> listIterator(int index) {
-    return null;
+    return new ListIteratorPrototype(index);
   }
 
   @Override
@@ -309,21 +383,100 @@ public class IgushArray<E> implements Iterable<E>, Collection<E>, List<E>, Rando
     return null;
   }
 
+  /**
+   * Returns the string representation of the contents of the IgushArray
+   *
+   * @return
+   */
   @Override
-
-  // replace with iterator in future
   public String toString() {
 
     StringBuilder sb = new StringBuilder();
     sb.append('[');
-    int j = 0;
-    for (; j < data.size(); j++) {
-      FixedDeque<E> deque = data.get(j);
-      for (int i = 0; i < deque.size(); i++) {
-        sb.append(deque.get(i).toString());
-        sb.append(',').append(' ');
+    ListIterator<E> itr = listIterator();
+    while (itr.hasNext()) {
+      sb.append(itr.next().toString());
+      if (itr.hasNext()) {
+        sb.append(", ");
       }
     }
+
     return sb.append(']').toString();
+  }
+
+  private class ListIteratorPrototype implements ListIterator<E> {
+    private int cursor;
+    private int lastRet = -1; // index of last returned element;
+
+    ListIteratorPrototype() {
+      cursor = 0; // cursor is right before the first element
+    }
+
+    ListIteratorPrototype(int index) {
+      cursor = index;
+    }
+
+    @Override
+    public boolean hasNext() {
+      if (cursor < size()) {
+        return true;
+      }
+      return false;
+    }
+
+    @Override
+    public E next() {
+      if (hasNext()) {
+        lastRet = cursor;
+        cursor++;
+        return get(lastRet);
+      }
+      throw new NoSuchElementException();
+    }
+
+    @Override
+    public boolean hasPrevious() {
+      if (cursor > 0) {
+        return true;
+      }
+      return false;
+    }
+
+    @Override
+    public E previous() {
+      if (hasPrevious()) {
+        lastRet = cursor;
+        cursor--;
+        return get(cursor);
+      }
+      throw new NoSuchElementException();
+    }
+
+    @Override
+    public int nextIndex() {
+      return cursor;
+    }
+
+    @Override
+    public int previousIndex() {
+      return cursor - 1;
+    }
+
+    @Override
+    public void remove() {
+      IgushArray.this.remove(lastRet);
+      lastRet = -1;
+    }
+
+    @Override
+    public void set(E e) {
+      IgushArray.this.set(cursor, e);
+    }
+
+    @Override
+    public void add(E e) {
+      IgushArray.this.add(cursor, e);
+      lastRet = -1;
+    }
   }
 }

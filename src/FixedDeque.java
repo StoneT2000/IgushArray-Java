@@ -45,16 +45,20 @@ public class FixedDeque<E> extends ArrayList<E> {
   @Override
   public boolean add(E element) {
     if (size() < capacity) {
-      super.add(element);
-      end = (end + 1) % capacity;
+      super.add(end + 1, element);
+      if (end < begin) {
+        begin = (begin + 1) % size();
+      }
+      end = (end + 1) % size();
       return true;
     }
 
     return false;
   }
+
   @Override
   public void add(int index, E element) {
-    throw new Error("Please use fixedAdd to add an element at this index");
+    fixedAdd(index, element);
   }
 
   @Override
@@ -75,6 +79,7 @@ public class FixedDeque<E> extends ArrayList<E> {
   /**
    * This is ArrayList.add but returning true if added and false if not added because capacity reached
    * Will always increase size of ArrayList by 1.
+   *
    * @param index
    * @param element
    * @return
@@ -86,22 +91,26 @@ public class FixedDeque<E> extends ArrayList<E> {
       if (size() == 0)
         addIndex = (begin + index);
       else
-        addIndex = (begin + index) % size();
+        addIndex = (begin + index) % (size() + 1);
 
 
-      //FIXME: can be reduced to one if statement using ||
+      super.add(addIndex, element);
+
+      //FIXME reduce code
       if (index == size()) {
         // adding to end
-        begin = (begin + 1);
-        end = (end + 1);
-      }
-      else if (index != 0){
-        if (addIndex <= end) {
+        end = (end + 1) % size(); // always moves up
+        if (addIndex <= begin) {
           begin = (begin + 1) % size();
+        }
+      } else {
+        if (addIndex < begin) {
+          begin = (begin + 1) % size();
+        }
+        if (addIndex <= end) {
           end = (end + 1) % size();
         }
       }
-      super.add(addIndex, element);
       return true;
     }
     return false;
@@ -128,13 +137,14 @@ public class FixedDeque<E> extends ArrayList<E> {
   @Override
   public E remove(int index) {
     rangeCheck(index);
-    E removedElement = get(index);
+
     int removeIndex = (begin + index) % size();
+    E removedElement = get(index); // use index here as get does the offsetting for us
     super.remove(removeIndex);
-    if (removeIndex <= begin)
-      begin = (begin - 1 + size()) % size();
+    if (removeIndex < begin)
+      begin = size() == 0 ? begin - 1 : (begin - 1 + size()) % size();
     if (removeIndex <= end)
-      end = (end - 1 + size()) % size();
+      end = size() == 0 ? end - 1 : (end - 1 + size()) % size();
     return removedElement;
   }
 
@@ -167,7 +177,7 @@ public class FixedDeque<E> extends ArrayList<E> {
    */
   public E shiftUp(E element) {
 
-    E oldElement = set(end, element);
+    E oldElement = set(size() - 1, element);
     end = (end - 1 + capacity) % capacity;
     begin = (begin - 1 + capacity) % capacity;
     return oldElement;
@@ -176,12 +186,12 @@ public class FixedDeque<E> extends ArrayList<E> {
   /**
    * Returns the first element and moves a element to the end of the fixed deque. To be used only when deque is full
    *
-   * @param element the element to shift to the front of the deque
-   * @return the last element which is removed.
+   * @param element the element to shift to the end of the deque
+   * @return the first element which is removed.
    */
   public E shiftDown(E element) {
 
-    E oldElement = set(begin, element);
+    E oldElement = set(0, element);
     end = (end + 1) % capacity;
     begin = (begin + 1) % capacity;
     return oldElement;
@@ -194,7 +204,6 @@ public class FixedDeque<E> extends ArrayList<E> {
     sb.append('[');
     int i = 0;
     for (; i < size() - 1; i++) {
-      //System.out.println((begin + i) % capacity);
       sb.append(get(i));
       sb.append(',').append(' ');
     }
