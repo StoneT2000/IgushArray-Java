@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2019 StoneT2000 (Stone Tao)
+ * Copyright (c) 2019 StoneT2000 (Stone Tao) email <stonezt2019@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * A Fixed Deque implemented with a Ring/Circular Buffer. This is not a full implementation, to be only used with IgushArray
+ * A Fixed Deque implemented with a ring/circular buffer built with a contiguous array.
+ * This is not a full implementation of a proper ring buffer, to be only used with IgushArray
  *
  * @param <E> the type of data stored in this fixed deque
  * @author Stone Tao
