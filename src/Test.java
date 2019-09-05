@@ -30,9 +30,22 @@ public class Test {
 
   public static void main(String args[]) throws IOException {
 
+    FileWriter csvWriter = new FileWriter("stats-insert.csv");
+    csvWriter.append("List Type");
+    csvWriter.append(",");
+    csvWriter.append("1000 Inserts to index 0");
+    csvWriter.append(",");
+    csvWriter.append("Time (ms)");
+    csvWriter.append("\n");
+    csvWriter.close();
+
+
+    /* Testing:
+    We create Lists of minimum size to accommodate the testing
+    All tests perform 1000 operations for at least N=10 trials at the moment.
     */
 
-    System.out.println("Testing IgushArray and ArrayList Insertion At Index 0/Push Front/Unshift");
+    System.out.println("Testing IgushArray and ArrayList Insertion At Index 0/Push Front/Unshift\n");
     // Initialize IgushArray of capacity 1E6
 
     System.out.printf("%-20s%-24s%-24s%-24s%-24s\n", "List Type", "List Size", "Average(ms)", "Max(ms)", "Min(ms)");
@@ -44,7 +57,8 @@ public class Test {
       testPushFrontTime("ArrayList", new ArrayList((int) Math.pow(10,i)), (int) Math.pow(10,i), 1000, 50);
     }
 
-    System.out.println("\nTesting IgushArray and ArrayList random access");
+    System.out.println("\nTesting IgushArray and ArrayList random access\n");
+    System.out.printf("%-20s%-24s%-24s%-24s%-24s\n", "List Type", "List Size", "Average(ms)", "Max(ms)", "Min(ms)");
 
     for (int i = 3; i < 8; i++) {
       testAccessTime("IgushArray", new IgushArray((int) Math.pow(10,i)), (int) Math.pow(10,i), 100000, 50);
@@ -53,7 +67,8 @@ public class Test {
       testAccessTime("ArrayList", new ArrayList((int) Math.pow(10,i)), (int) Math.pow(10,i), 100000, 50);
     }
 
-    System.out.println("\nTesting IgushArray and ArrayList remove front");
+    System.out.println("\nTesting IgushArray and ArrayList remove front\n");
+    System.out.printf("%-20s%-24s%-24s%-24s%-24s\n", "List Type", "List Size", "Average(ms)", "Max(ms)", "Min(ms)");
     for (int i = 3; i < 8; i++) {
       testRemoveFront("IgushArray", new IgushArray((int) Math.pow(10,i)), (int) Math.pow(10,i), 1000, 50);
     }
