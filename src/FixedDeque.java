@@ -161,6 +161,13 @@ public class FixedDeque<E> extends ArrayList<E> {
     return false;
   }
 
+  @Override
+  public void clear() {
+    super.clear();
+    begin = 0;
+    end = -1;
+  }
+
   /**
    * Returns the last element and moves a element to the front of the fixed deque. To be used only when deque is full
    *

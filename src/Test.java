@@ -30,51 +30,36 @@ public class Test {
 
   public static void main(String args[]) throws IOException {
 
-    /*
-    System.out.println("Test adding procedures");
-    IgushArray<Integer> testAdd = new IgushArray((int) (17));
-    for (int i = 0; i < 14; i++) {
-      testAdd.add(i);
-    }
-    System.out.println(testAdd.toString());
-    testAdd.add(6,1000);
-    System.out.println(testAdd.toString());
-    testAdd.add(0,1001);
-    System.out.println(testAdd.toString());
-    testAdd.remove(0);
-    System.out.println(testAdd.toString());
-    testAdd.add(testAdd.size(), 1002);
-    testAdd.remove(4);
-    testAdd.remove(4);
-    System.out.println(testAdd.toString());
     */
 
-    /*
-    System.out.println(test.toString());
-    test.remove(0);
-    System.out.println(test.toString());
-    test.remove(0);
-    System.out.println(test.toString());
-    test.remove(8);
-    System.out.println(test.toString());
-
-    */
-    System.out.println("Testing IgushArray Insertion At Index 0/Push Front/Unshift");
+    System.out.println("Testing IgushArray and ArrayList Insertion At Index 0/Push Front/Unshift");
     // Initialize IgushArray of capacity 1E6
-    IgushArray<Integer> test = new IgushArray((int) (10 * 1E5));
-    testPushFront(test, "IgushArray");
-    System.out.println(test.toString());
-    Collections.sort(test);
-    System.out.println(test.toString());
-    System.out.println("Testing ArrayList Insertion At Index 0/Push Front/Unshift");
-    // Initialize ArrayList of capacity 1E6
-    ArrayList<Integer> testArrayList = new ArrayList<>((int) (10 * 1E5));
 
+    System.out.printf("%-20s%-24s%-24s%-24s%-24s\n", "List Type", "List Size", "Average(ms)", "Max(ms)", "Min(ms)");
 
-    testPushFront(testArrayList, "ArrayList");
-    Collections.sort(testArrayList);
-    System.out.println(testArrayList.toString());
+    for (int i = 3; i < 8; i++) {
+      testPushFrontTime("IgushArray", new IgushArray((int) Math.pow(10,i)), (int) Math.pow(10,i), 1000, 50);
+    }
+    for (int i = 3; i < 8; i++) {
+      testPushFrontTime("ArrayList", new ArrayList((int) Math.pow(10,i)), (int) Math.pow(10,i), 1000, 50);
+    }
 
+    System.out.println("\nTesting IgushArray and ArrayList random access");
+
+    for (int i = 3; i < 8; i++) {
+      testAccessTime("IgushArray", new IgushArray((int) Math.pow(10,i)), (int) Math.pow(10,i), 100000, 50);
+    }
+    for (int i = 3; i < 8; i++) {
+      testAccessTime("ArrayList", new ArrayList((int) Math.pow(10,i)), (int) Math.pow(10,i), 100000, 50);
+    }
+
+    System.out.println("\nTesting IgushArray and ArrayList remove front");
+    for (int i = 3; i < 8; i++) {
+      testRemoveFront("IgushArray", new IgushArray((int) Math.pow(10,i)), (int) Math.pow(10,i), 1000, 50);
+    }
+    for (int i = 3; i < 8; i++) {
+      testRemoveFront("ArrayList", new ArrayList((int) Math.pow(10,i)), (int) Math.pow(10,i), 1000, 50);
+    }
 
 
     /*
@@ -93,49 +78,86 @@ public class Test {
 
   }
 
-  /**
-   * Tests a list's speed to sequentially push 1E6 elements to the front of the list
-   * @param list
-   * @param name
-   */
-  public static void testPushFront(List list, String name) {
-    for (int i = 0; i < 10; i++) {
-      long stime = System.currentTimeMillis();
-      for (int j = 0; j < 3; j++) {
-        list.add(0, (int) (Math.random() * 20));
-      }
-      long ftime = System.currentTimeMillis();
-      System.out.printf("%-15s", name);
-      System.out.println("Batch - " + i + ": " + (ftime - stime) + "ms");
+  public static void displayStats(int size, DoubleSummaryStatistics dss) {
+    System.out.printf("%-24s", size);
+    System.out.printf("%-24.4f", dss.getAverage());
+    System.out.printf("%-24.4f", dss.getMax());
+    System.out.printf("%-24.4f", dss.getMin());
+    System.out.print("\n");
+  }
+
+  public static void clearAndInitialize(List list, int size) {
+    list.clear();
+    Random rand = new Random(1000);
+    for (int i = 0; i < size; i++) {
+      list.add(rand.nextInt());
     }
   }
 
-  /**
-   * Tests a list's speed to access 1E7 random indices 10 times
-   * @param list
-   * @param name
-   */
-  public static void testAccess(List list, String name) {
-    for (int i = 0; i < 10; i++) {
-      long stime = System.currentTimeMillis();
-      for (int j = 0; j < 1E7; j++) {
-        list.get((int) (Math.random() * list.size()));
-      }
-      long ftime = System.currentTimeMillis();
-      System.out.printf("%-15s", name);
-      System.out.println("Batch - " + i + ": " + (ftime - stime) + "ms");
+  public static void testPushFrontTime(String name, List list, int size, int executions, int trials) {
+    System.out.printf("%-20s", name);
+    double[] stats = new double[trials];
+    DoubleSummaryStatistics dss = new DoubleSummaryStatistics();
+    for (int i = 0; i < trials; i++) {
+      clearAndInitialize(list, (int) size - executions);
+      stats[i] = pushFrontTime(list, executions);
+      dss.accept(stats[i]);
     }
+    displayStats(list.size(), dss);
   }
 
-  public static void testRemoveFront(List list, String name) {
-    for (int i = 0; i < 10; i++) {
-      long stime = System.currentTimeMillis();
-      for (int j = 0; j < 1E5; j++) {
-        list.remove(0);
-      }
-      long ftime = System.currentTimeMillis();
-      System.out.printf("%-15s", name);
-      System.out.println("Batch - " + i + ": " + (ftime - stime) + "ms");
+  // Gives average time to push/insert to the front of this list for the given number of insertions/executions
+  public static double pushFrontTime(List list, int executions) {
+    Random rand = new Random(1000);
+    long stime = System.currentTimeMillis();
+    for (int i = 0; i < executions; i++) {
+      list.add(0, rand.nextInt());
     }
+    long ftime = System.currentTimeMillis();
+    return (double) (ftime - stime);
   }
+
+  public static void testAccessTime(String name, List list, int size, int executions, int trials) {
+    System.out.printf("%-20s", name);
+    double[] stats = new double[trials];
+    DoubleSummaryStatistics dss = new DoubleSummaryStatistics();
+    clearAndInitialize(list, (int) size);
+    for (int i = 0; i < trials; i++) {
+      stats[i] = accessTime(list, executions);
+      dss.accept(stats[i]);
+    }
+    displayStats(list.size(), dss);
+  }
+
+  public static double accessTime(List list, int executions) {
+    Random rand = new Random(1000);
+    long stime = System.currentTimeMillis();
+    for (int i = 0; i < executions; i++) {
+      list.get((int) (rand.nextInt(list.size())));
+    }
+    long ftime = System.currentTimeMillis();
+    return (double) (ftime - stime);
+  }
+
+  public static void testRemoveFront(String name, List list, int size, int executions, int trials) {
+    System.out.printf("%-20s", name);
+    double[] stats = new double[trials];
+    DoubleSummaryStatistics dss = new DoubleSummaryStatistics();
+    for (int i = 0; i < trials; i++) {
+      clearAndInitialize(list, (int) size);
+      stats[i] = removeFront(list, executions);
+      dss.accept(stats[i]);
+    }
+    displayStats(size, dss);
+  }
+
+  public static double removeFront(List list, int executions) {
+    long stime = System.currentTimeMillis();
+    for (int i = 0; i < executions; i++) {
+      list.remove(0);
+    }
+    long ftime = System.currentTimeMillis();
+    return (double) (ftime - stime);
+  }
+
 }

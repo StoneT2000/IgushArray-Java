@@ -409,7 +409,6 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
   public void clear() {
     for (int i = 0; i < listCapacity; i++) {
       data.get(i).clear();
-      ;
     }
     size = 0;
   }
