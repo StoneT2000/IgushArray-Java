@@ -27,7 +27,7 @@ import java.util.*;
 
 public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, Serializable {
 
-  public List<FixedDeque<E>> data; // data is stored as a list of lists (array of arrays).
+  public ArrayList<FixedDeque<E>> data; // data is stored as a list of lists (array of arrays).
   private int capacity; // total capacity of the IgushArray
   private int size; // the current size of IgushArray, not the same as capacity
   private int deqCapacity; // capacity of each ArrayDeque in the list
@@ -139,9 +139,74 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
    * Increases the capacity of this IgushArray instance, if necessary, to ensure that it can hold
    * at least the number of elements specified by the minimum capacity argument. Akin to ArrayList's same method
    *
-   * @param minCapacity
+   * @param minCapacity the size to expand to
    */
   public void ensureCapacity(int minCapacity) {
+    if (minCapacity < capacity) {
+      throw new IllegalArgumentException("New capacity: " + minCapacity + " is not larger than the old capacity of " + capacity);
+    }
+    capacity = minCapacity;
+
+    // reset the deqCapacities to maintain optimal insert and remove times
+    // quite costly
+
+    int newDeqCapacity = (int) Math.pow(capacity, 0.5);
+    int newLastDeqCapacity = capacity % deqCapacity;
+    int newListCapacity = (int) Math.ceil((double) capacity / deqCapacity);
+
+    if (newDeqCapacity != deqCapacity) {
+      // deq capacity changed, which implies list capacity must change
+      deqCapacity = newDeqCapacity;
+
+      // go from 0 to listCapacity instead of listCapacity - 1 as list capacity must change, and the final fixedDeque
+      // should now have normal deq size.
+      for (int i = 0; i < listCapacity; i++) {
+        data.get(i).ensureCapacity(deqCapacity);
+      }
+      // now we have to shift all data down to fill in holes, fairly costly to do
+
+      int indexOfLastPartialFixedDeque = (int) Math.ceil((double) size() / newDeqCapacity);
+      int j = 0;
+      while (j < indexOfLastPartialFixedDeque) {
+        int higherIndice = j + 1;
+
+        // keep filling FixedDeque at indice j until it is full. Pop from FixedDeque higherIndice until it is empty
+        // before moving on to next FixedDeque to pop from.
+        while (!data.get(j).isFull() && !data.get(higherIndice).isEmpty()) {
+          // data.get(j) fixedDeque has space left, fill it up with array data from next index.
+          E popped = data.get(higherIndice).popFront();
+          data.get(j).add(popped);
+          if (data.get(higherIndice).isEmpty()) {
+            higherIndice++;
+          }
+        }
+        j++;
+      }
+    }
+
+    //FIXME might be a redundant check, see how ArrayList ensureCapacity is implemented
+    if (newListCapacity != listCapacity) {
+
+      if (data.get(listCapacity - 1).size() != deqCapacity) {
+        // new list capacity means old last FixedDeque needs to be of size deqCapacity
+        data.get(listCapacity - 1).ensureCapacity(deqCapacity);
+      }
+
+      data.ensureCapacity(newListCapacity);
+      for (int i =  listCapacity; i < newListCapacity - 1; i++) {
+        data.add(new FixedDeque<>(deqCapacity));
+      }
+      lastDeqCapacity = newLastDeqCapacity;
+
+      if (lastDeqCapacity != 0) {
+        data.add(new FixedDeque<E>(lastDeqCapacity));
+      } else {
+        data.add(new FixedDeque<E>(deqCapacity));
+      }
+
+      listCapacity = newListCapacity;
+    }
+
 
   }
 
@@ -328,15 +393,17 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
   @Override
   //FIXME will also automatically reallocate memory if size reaches capacity
   public boolean add(E e) {
-    if (size() < capacity) {
+    if (true) {
+      if (size() >= capacity) {
+        ensureCapacity((int) (capacity * 1.5));
+      }
       int listIndex = (int) (size() / deqCapacity);
       int deqIndex = size() % deqCapacity;
       data.get(listIndex).add(e);
       size++;
       return true;
     } else {
-      //we reach capacity, we need to expand the capacities of the deques.
-      // NOT RECOMMENDED TO OCCUR
+
     }
     return false;
   }
@@ -371,6 +438,7 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
 
   /**
    * Removes the element stored in the specified position in the IgushArray
+   *
    * @param index of the element to remove
    * @return the element that was removed
    */
@@ -504,7 +572,6 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
   // FIXME DOCUMENTATION
 
   /**
-   *
    * @param fromIndex
    * @param toIndex
    * @return
@@ -529,9 +596,9 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
    * @param c the comparator to use to sort the IgushArray
 
   public void sort(Comparator<? super E> c) {
-    Collections.sort(this, c);
+  Collections.sort(this, c);
   }
-  */
+   */
 
   /**
    * Returns the string representation of the contents of the IgushArray

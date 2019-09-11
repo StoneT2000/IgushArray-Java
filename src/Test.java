@@ -45,7 +45,7 @@ public class Test {
     All tests perform 1000 operations for at least N=10 trials at the moment.
     */
 
-    System.out.println("Testing IgushArray and ArrayList Insertion At Index 0/Push Front/Unshift\n");
+    System.out.println("Testing IgushArray and ArrayList Insertion At Index 0/Push Front/Unshift | 1000 executions 50 trials\n");
     // Initialize IgushArray of capacity 1E6
 
     System.out.printf("%-20s%-24s%-24s%-24s%-24s\n", "List Type", "List Size", "Average(ms)", "Max(ms)", "Min(ms)");
@@ -57,7 +57,7 @@ public class Test {
       testPushFrontTime("ArrayList", new ArrayList((int) Math.pow(10,i)), (int) Math.pow(10,i), 1000, 50);
     }
 
-    System.out.println("\nTesting IgushArray and ArrayList random access\n");
+    System.out.println("\nTesting IgushArray and ArrayList random access | 100,000 executions 50 trials\n");
     System.out.printf("%-20s%-24s%-24s%-24s%-24s\n", "List Type", "List Size", "Average(ms)", "Max(ms)", "Min(ms)");
 
     for (int i = 3; i < 8; i++) {
@@ -67,7 +67,7 @@ public class Test {
       testAccessTime("ArrayList", new ArrayList((int) Math.pow(10,i)), (int) Math.pow(10,i), 100000, 50);
     }
 
-    System.out.println("\nTesting IgushArray and ArrayList remove front\n");
+    System.out.println("\nTesting IgushArray and ArrayList remove front | 1000 executions 50 trials\n");
     System.out.printf("%-20s%-24s%-24s%-24s%-24s\n", "List Type", "List Size", "Average(ms)", "Max(ms)", "Min(ms)");
     for (int i = 3; i < 8; i++) {
       testRemoveFront("IgushArray", new IgushArray((int) Math.pow(10,i)), (int) Math.pow(10,i), 1000, 50);

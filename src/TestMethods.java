@@ -28,47 +28,67 @@ public class TestMethods {
   /**
    * Integrity Testing for all methods. Use JUnit in future
    */
-  public static void main(String args[]) {
+  public static void main(String args[]) throws Exception {
 
     /*
       Test class initialization
      */
+    System.out.println("-- Testing class initialization --");
     ArrayList<Integer> list = new ArrayList<>(10);
     for (int i = 0; i < 10; i++) {
       list.add(i);
     }
     IgushArray<Integer> test = new IgushArray<>(list, 20);
-    System.out.println(test.toString() + " == 0 to 9");
+    compareLists(list, test);
+    if (test.capacity() != 20) throw new Exception("Capacity not correct");
     test = new IgushArray<>(list);
-    System.out.println(test.toString() + " == 0 to 9");
+    compareLists(list, test);
     test = new IgushArray<>(20);
     test.add(10);
     test.add(20);
     test.remove(1);
-    System.out.println(test.toString() + " == [10]");
+    list.add(10);
+    list.add(20);
+    list.remove(1);
 
 
     /*
     Test indexOf, lastIndexOf
      */
-    test = new IgushArray<>(list, 20);
-    test.add(4);
-    System.out.println(test.lastIndexOf(4) + " == " + 10);
-    System.out.println(test.indexOf(4) + " == " + 4);
+    System.out.println("-- Testing indexOf lastIndexOf --");
+    test = new IgushArray<>(20);
+    list = new ArrayList<>(20);
+    int randInt = (int) (Math.random() * 10000 - 5000);
+    for (int i = 0; i < 20; i++) {
+      if (i % 4 == 0) {
+        test.add(randInt);
+        list.add(randInt);
+      }
+      else {
+        test.add(i);
+        list.add(i);
+      }
+    }
+    test.add(randInt);
+    list.add(randInt);
+    if(test.lastIndexOf(randInt) != list.lastIndexOf(randInt)) throw new Exception("lastIndexOf failed");
+    if(test.indexOf(randInt) != list.indexOf(randInt)) throw new Exception("indexOf failed");
 
     /*
     Test using collections method on IgushArray
      */
+    System.out.println("-- Testing collections manipulation on lists --");
+    list = new ArrayList<>(100);
     for (int i = 0; i < 10; i++) {
       list.add(100 - i);
     }
     test = new IgushArray<>(list, 100);
-    System.out.println(test.toString() + " == unsorted");
     Collections.sort(test);
-    System.out.println(test.toString() + " == sorted");
     Collections.reverse(test);
-    System.out.println(test.toString() + " == descending sorted");
-    System.out.println(Collections.max(test) + " == " + 100);
+    Collections.sort(list);
+    Collections.reverse(list);
+    compareLists(list, test);
+    Collections.max(test);
 
     /*
     Test addition, insertion, popping, pushing/addition, removal
@@ -76,15 +96,45 @@ public class TestMethods {
 
     test.add(100);
     test.add(1043);
-    test.add(142);
-    System.out.println(sum(test) + " == 2285");
+    test.add(-142);
+    list.add(100);
+    list.add(1043);
+    list.add(-142);
+    compareLists(list, test);
 
+
+    test = new IgushArray<>(10);
+    list = new ArrayList<>(10);
+    for (int i = 0; i < 10; i++) {
+      test.add(0);
+      list.add(0);
+    }
+    list.add(1);
+    test.add(1); // ensure capacity
+
+    compareLists(list, test);
+
+    test = new IgushArray<>(20);
+    list = new ArrayList<>(20);
+    for (int i = 0; i < 20; i++) {
+      test.add(i);
+      list.add(i);
+    }
+    test.ensureCapacity(100);
+    list.ensureCapacity(100);
+    compareLists(list, test);
+    if (test.capacity() != 100) throw new Exception("Capacity not correct");
   }
-  public static Integer sum(List list) {
-    Integer sum = 0;
-    ListIterator itr = list.listIterator();
-    while (itr.hasNext())
-      sum += (Integer) itr.next();
-    return sum;
+
+  public static void compareLists(List list1, List list2) throws Exception {
+    for (int i = 0; i < list1.size(); i++) {
+      if (!list1.get(i).equals(list2.get(i))) {
+        System.out.println("List 1: " + list1.toString());
+        System.out.println("List 2: " + list2.toString());
+        throw new Exception("Lists not equal");
+      }
+    }
+    System.out.println("Lists equal");
+
   }
 }

@@ -23,7 +23,6 @@
  */
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A Fixed Deque implemented with a ring/circular buffer built with a contiguous array.
@@ -45,6 +44,7 @@ public class FixedDeque<E> extends ArrayList<E> {
   }
 
   @Override
+  //FIXME reduce function overhead here
   public boolean add(E element) {
     return fixedAdd(size(), element);
   }
@@ -71,7 +71,7 @@ public class FixedDeque<E> extends ArrayList<E> {
 
   /**
    * This is ArrayList.add but returning true if added and false if not added because capacity reached
-   * Will always increase size of ArrayList by 1.
+   * Will always increase size of ArrayList by 1. The only method that should check if is capacity reached
    *
    * @param index
    * @param element
@@ -89,7 +89,7 @@ public class FixedDeque<E> extends ArrayList<E> {
 
       super.add(addIndex, element);
 
-      //FIXME reduce code
+      //FIXME reduce code, too much constant factors
       if (index == size()) {
         // adding to end
         end = (end + 1) % size(); // always moves up
@@ -128,6 +128,28 @@ public class FixedDeque<E> extends ArrayList<E> {
   }
 
   @Override
+  //FIXME Exists better implementation instead of resetting the start and end
+  // this is O(n) time and O(n) space at the moment
+  public void ensureCapacity(int minCapacity) {
+    super.ensureCapacity(minCapacity);
+    // we need to reset order of elements and the values of begin and end due to new space.
+    E[] tempArr = (E[]) new Object[size()];
+
+    for (int i = 0; i < size(); i++) {
+      tempArr[i] = get((begin + i) % capacity);
+    }
+
+    for (int i = 0; i < size(); i++) {
+      super.set(i, tempArr[i]);
+    }
+
+    capacity = minCapacity;
+    begin = 0;
+    end = begin + size();
+  }
+
+  // O(n)
+  @Override
   public E remove(int index) {
     rangeCheck(index);
 
@@ -142,15 +164,11 @@ public class FixedDeque<E> extends ArrayList<E> {
   }
 
   public E pop() {
-    E endElement = get(size() - 1);
-    end = (end - 1 + capacity) % capacity;
-    return endElement;
+    return remove(size() - 1);
   }
 
   public E popFront() {
-    E frontElement = get(0);
-    begin = (begin + 1) % capacity;
-    return frontElement;
+    return remove(0);
   }
 
   public boolean pushFront(E element) {
