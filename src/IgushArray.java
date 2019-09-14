@@ -411,7 +411,9 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
   @Override
   public void add(int index, E element) {
     rangeCheckForAdd(index);
-
+    if (size() >= capacity) {
+      ensureCapacity((int) (capacity * 1.5));
+    }
     int listIndex = index / deqCapacity;
     int deqIndex = index % deqCapacity;
     FixedDeque<E> deque = data.get(listIndex);
@@ -423,10 +425,7 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
       deque.fixedAdd(deqIndex, element);
       shiftUp(listIndex + 1, removedElement);
 
-    } else {
-      //FIXME increase capacity
     }
-
     size++;
   }
 
