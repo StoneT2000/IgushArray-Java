@@ -397,7 +397,6 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
       ensureCapacity((int) (capacity * 1.5));
     }
     int listIndex = (int) (size() / deqCapacity);
-    int deqIndex = size() % deqCapacity;
     data.get(listIndex).add(e);
     size++;
     return true;
