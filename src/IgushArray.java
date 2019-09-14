@@ -393,19 +393,14 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
   @Override
   //FIXME will also automatically reallocate memory if size reaches capacity
   public boolean add(E e) {
-    if (true) {
-      if (size() >= capacity) {
-        ensureCapacity((int) (capacity * 1.5));
-      }
-      int listIndex = (int) (size() / deqCapacity);
-      int deqIndex = size() % deqCapacity;
-      data.get(listIndex).add(e);
-      size++;
-      return true;
-    } else {
-
+    if (size() >= capacity) {
+      ensureCapacity((int) (capacity * 1.5));
     }
-    return false;
+    int listIndex = (int) (size() / deqCapacity);
+    int deqIndex = size() % deqCapacity;
+    data.get(listIndex).add(e);
+    size++;
+    return true;
   }
 
   /**
