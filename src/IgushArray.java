@@ -152,8 +152,7 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
 
     int newDeqCapacity = (int) Math.pow(capacity, 0.5);
     int newLastDeqCapacity = capacity % deqCapacity;
-    int newListCapacity = (int) Math.ceil((double) capacity / deqCapacity);
-
+    int newListCapacity = (int) Math.ceil((double) capacity / newDeqCapacity);
     if (newDeqCapacity != deqCapacity) {
       // deq capacity changed, which implies list capacity must change
       deqCapacity = newDeqCapacity;
