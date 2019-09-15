@@ -166,17 +166,24 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
 
       int indexOfLastPartialFixedDeque = (int) Math.ceil((double) size() / newDeqCapacity);
       int j = 0;
+
       while (j < indexOfLastPartialFixedDeque) {
         int higherIndice = j + 1;
 
         // keep filling FixedDeque at indice j until it is full. Pop from FixedDeque higherIndice until it is empty
         // before moving on to next FixedDeque to pop from.
-        while (!data.get(j).isFull() && !data.get(higherIndice).isEmpty()) {
+        while (!data.get(j).isFull()) {
           // data.get(j) fixedDeque has space left, fill it up with array data from next index.
-          E popped = data.get(higherIndice).popFront();
-          data.get(j).add(popped);
+
           if (data.get(higherIndice).isEmpty()) {
             higherIndice++;
+            if (higherIndice > listCapacity - 1) {
+              break;
+            }
+          }
+          else {
+            E popped = data.get(higherIndice).popFront();
+            data.get(j).add(popped);
           }
         }
         j++;
@@ -441,6 +448,7 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
     int deqIndex = index % deqCapacity;
     FixedDeque<E> deque = data.get(listIndex);
     E removedElement = deque.remove(deqIndex);
+    // only shift down if listIndex isn't final listIndex
     shiftDown(listIndex + 1);
     size--;
     return removedElement;
@@ -531,7 +539,7 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
   private void shiftDown(int listIndex) {
     E endElement;
     int currListIndex = (int) Math.ceil((double) size() / deqCapacity - 1); //FIXME this could be done better
-    if (currListIndex == 0)
+    if (currListIndex == listIndex - 1)
       return;
     FixedDeque<E> deque = data.get(currListIndex);
     endElement = deque.remove(0);

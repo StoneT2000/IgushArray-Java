@@ -124,6 +124,40 @@ public class TestMethods {
     list.ensureCapacity(100);
     compareLists(list, test);
     if (test.capacity() != 100) throw new Exception("Capacity not correct");
+
+    test = new IgushArray<>(12);
+    list = new ArrayList<>(12);
+    for (int i = 0; i < 12; i++) {
+      test.add(i);
+      list.add(i);
+    }
+    test.ensureCapacity(30);
+    list.ensureCapacity(30);
+    compareLists(list, test);
+
+    test = new IgushArray<>(11);
+    list = new ArrayList<>(11);
+    for (int i = 0; i < 11; i++) {
+      test.add(i);
+      list.add(i);
+    }
+    test.ensureCapacity(100);
+    list.ensureCapacity(100);
+    compareLists(list, test);
+
+    test = new IgushArray<>(10);
+    list = new ArrayList<>(10);
+    for (int i = 0; i < 10; i++) {
+      test.add(i);
+      list.add(i);
+    }
+    test.ensureCapacity(20);
+    list.ensureCapacity(20);
+    for (int i = 0; i < 4; i++) {
+      test.remove(4);
+      list.remove(4);
+    }
+    compareLists(list, test);
   }
 
   public static void compareLists(List list1, List list2) throws Exception {
