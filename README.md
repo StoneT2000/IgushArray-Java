@@ -3,6 +3,8 @@
 
 The java implementation of the IgushArray is a one for one replacement for an ArrayList as it extends **[AbstractList](https://docs.oracle.com/javase/8/docs/api/java/util/AbstractList.html)\<E>** and implements the same interfaces as ArrayList, namely **[Serializable](https://docs.oracle.com/javase/7/docs/api/java/io/Serializable.html), [Cloneable](https://docs.oracle.com/javase/7/docs/api/java/lang/Cloneable.html), [List](https://docs.oracle.com/javase/7/docs/api/java/util/List.html)\<E>, [RandomAccess](https://docs.oracle.com/javase/7/docs/api/java/util/RandomAccess.html)**, whilst also including some of ArrayList's own methods.
 
+You are welcome to **contribute** to this repository, just create a pull request and submit it. Need an idea on what to work on? Check out the **Todo** list at the bottom of this readme. Have a suggestion or issue? Submit an issue to this repository on GitHub.
+
 ## Overview
 
 Comparisons of time complexities in key operations in similar data structures are shown below.
