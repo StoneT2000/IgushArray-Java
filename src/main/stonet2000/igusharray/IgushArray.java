@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+package stonet2000.igusharray;
+
 import java.io.Serializable;
 import java.util.*;
 

@@ -23,7 +23,7 @@
  */
 
 import java.util.*;
-
+import stonet2000.igusharray.*;
 public class TestMethods {
   /**
    * Integrity Testing for all methods. Use JUnit in future

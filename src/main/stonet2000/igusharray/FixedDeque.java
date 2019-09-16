@@ -1,4 +1,4 @@
-/**
+package stonet2000.igusharray; /**
  * MIT License
  *
  * Copyright (c) 2019 StoneT2000 (Stone Tao) email <stonezt2019@gmail.com>
@@ -160,6 +160,8 @@ public class FixedDeque<E> extends ArrayList<E> {
       begin = size() == 0 ? begin - 1 : (begin - 1 + size()) % size();
     if (removeIndex <= end)
       end = size() == 0 ? end - 1 : (end - 1 + size()) % size();
+
+      //FIXME: Edge case when index == 0 -> removeIndex == begin and removeIndex == size() after removal, begin should = begin % size();
     return removedElement;
   }
 

@@ -24,7 +24,7 @@
 
 import java.io.*;
 import java.util.*;
-
+import stonet2000.igusharray.*;
 public class Test {
 
 
