@@ -483,29 +483,83 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
     size = 0;
   }
 
-
+  /**
+   * Appends all of the elements in the specified collection to end of this IgushArray,
+   * in the order that they are returned by the specified collection's Iterator
+   *
+   * @param c
+   * @return true if this IgushArray was modified
+   */
   @Override
   public boolean addAll(Collection<? extends E> c) {
-    //FIXME
-    return false;
+    Iterator<?> itr = c.iterator();
+    boolean flag = false;
+    while (itr.hasNext()) {
+        add((E) itr.next());
+        flag = true;
+    }
+    return flag;
   }
 
+  /**
+   * Inserts all of the elements in the specified collection into this IgushArray,
+   * starting at the specified position.
+   *
+   * @param c
+   * @return true if this IgushArray was modified
+   */
   @Override
   public boolean addAll(int index, Collection<? extends E> c) {
-    //FIXME
-    return false;
+    Iterator<?> itr = c.iterator();
+    while (itr.hasNext()) {
+        add(index, (E) itr.next());
+        index++;
+    }
+    return c.size() > 0;
   }
 
+  /**
+   * Removes from this IgushArray all elements that are contained in the
+   * specified collection.
+   *
+   * @param c
+   * @return true if this IgushArray was modified
+   */
   @Override
   public boolean removeAll(Collection<?> c) {
-    //FIXME
-    return false;
+    Iterator<?> itr = c.iterator();
+    boolean flag = false;
+    while (itr.hasNext()) {
+        Object o = itr.next();
+        if (contains(o)) {
+            remove(o);
+            flag = true;
+        }
+    }
+    return flag;
   }
 
+  /**
+   * Retains only the elements in this IgushArray that are contained in the
+   * specified collection.
+   *
+   * @param c
+   * @return true if this IgushArray was modified
+   */
   @Override
   public boolean retainAll(Collection<?> c) {
-    //FIXME
-    return false;
+    // FIXME optimize performance
+    HashSet<Object> hs = new HashSet<>();
+    for (int i = 0; i < size; i++) {
+        Object o = get(i);
+        if (!c.contains(o)) {
+            hs.add(o);
+        }
+    }
+
+    boolean flag = removeAll(hs);
+
+    return flag;
   }
 
   @Override
@@ -513,12 +567,14 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
     return false;
   }
 
-  //FIXME might not be right
+
   @Override
   protected void removeRange(int fromIndex, int toIndex) {
-    for (int i = fromIndex; i <= toIndex; i++) {
-      remove(fromIndex);
+    HashSet<Object> hs = new HashSet<>();
+    for (int i = fromIndex; i < toIndex; i++) {
+      hs.add(get(i));
     }
+    removeAll(hs);
   }
 
   // Only used when we add/insert an element usually
