@@ -8,7 +8,7 @@ import java.util.LinkedList;
 
 import static org.junit.Assert.*;
 
-public class TestAddRemoveRetainAll {
+public class TestXAll {
 
     IgushArray<Integer> ia;
 
@@ -90,6 +90,16 @@ public class TestAddRemoveRetainAll {
 
         assertTrue(ia.retainAll(new HashSet<>())); //remove all
         assertTrue(ia.isEmpty());
+    }
+
+    @Test
+    public void testContainsAll() {
+        HashSet<Integer> hs = new HashSet<>();
+        hs.add(1);
+        hs.add(4);
+        assertTrue(ia.containsAll(hs));
+        hs.add(100);
+        assertFalse(ia.containsAll(hs));
     }
 
     // Make removeRange public to use this test. (Don't forget to re-protect it after!)

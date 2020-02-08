@@ -562,9 +562,23 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
     return flag;
   }
 
+  /**
+   * Returns true if this IgushArray contains all elements of the specified collection
+   *
+   * @param c
+   * @return
+   */
   @Override
   public boolean containsAll(Collection<?> c) {
-    return false;
+    Iterator<?> it = c.iterator();
+    boolean result = true;
+    while (it.hasNext()) {
+        if (!contains(it.next())) {
+            result = false;
+            break;
+        }
+    }
+    return result;
   }
 
 
