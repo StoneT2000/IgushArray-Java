@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2019 StoneT2000 (Stone Tao) email <stonezt2019@gmail.com>
+ * Copyright (c) 2020 StoneT2000 (Stone Tao) email <stonezt2019@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
