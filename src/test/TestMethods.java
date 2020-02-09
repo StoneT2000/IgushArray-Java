@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 
 public class TestMethods {
 
-  static final int INITIAL_AMOUNT = 17; // amount of initial values in IgushArray for testing
+  static final int INITIAL_AMOUNT = 55; // amount of initial values in IgushArray for testing
 
   static final int ADD_AMOUNT = 10; // amount of values to add for testing
   static final int RANGE = 1000; // range of values to add, namely [-RANGE/2, RANGE/2]
