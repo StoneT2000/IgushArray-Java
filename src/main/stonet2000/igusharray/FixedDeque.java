@@ -136,7 +136,7 @@ public class FixedDeque<E> extends ArrayList<E> {
     E[] tempArr = (E[]) new Object[size()];
 
     for (int i = 0; i < size(); i++) {
-      tempArr[i] = get((begin + i) % capacity);
+      tempArr[i] = get(i);
     }
 
     for (int i = 0; i < size(); i++) {
@@ -145,7 +145,7 @@ public class FixedDeque<E> extends ArrayList<E> {
 
     capacity = minCapacity;
     begin = 0;
-    end = begin + size();
+    end = begin + size() - 1;
   }
 
   // O(n)

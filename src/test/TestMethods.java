@@ -10,10 +10,10 @@ public class TestMethods {
 
   static final int INITIAL_AMOUNT = 55; // amount of initial values in IgushArray for testing
 
-  static final int ADD_AMOUNT = 10; // amount of values to add for testing
+  static final int ADD_AMOUNT = 150; // amount of values to add for testing
   static final int RANGE = 1000; // range of values to add, namely [-RANGE/2, RANGE/2]
 
-  static final boolean SIMPLE_VALUES = true; // flag for whether to populate a list with simple values for debugging
+  static final boolean SIMPLE_VALUES = false; // flag for whether to populate a list with simple values for debugging
 
   List<Integer> igushArray;
   List<Integer> truthList;
@@ -77,9 +77,16 @@ public class TestMethods {
     // add 0, 1, ..., INITIAL_AMOUNT to IgushArray if using SIMPLE_VALUES
     // otherwise some random numbers
     for (int i = 0; i < INITIAL_AMOUNT; i++) {
-      int rand = randInt();
-      igushArray.add(rand);
-      truthList.add(rand);
+      if (SIMPLE_VALUES) {
+        igushArray.add(i);
+        truthList.add(i);
+      }
+      else {
+        int rand = randInt();
+        igushArray.add(rand);
+        truthList.add(rand);
+      }
+
     }
     assertArrayEquals(igushArray.toArray(), truthList.toArray());
   }
@@ -87,14 +94,20 @@ public class TestMethods {
   @Test
   public void testRemove() {
 
-    // remove front index until empty
-    for (int i = 0; i < INITIAL_AMOUNT / 2; i++) {
-      int rand = randInt();
+    // remove front index for a quarter
+    for (int i = 0; i < INITIAL_AMOUNT / 4; i++) {
       igushArray.remove(0);
       truthList.remove(0);
     }
-
     assertArrayEquals(igushArray.toArray(), truthList.toArray());
+
+    // remove end index for a quarter
+    for (int i = 0; i < INITIAL_AMOUNT / 4; i++) {
+      igushArray.remove(truthList.size() - 1);
+      truthList.remove(truthList.size() - 1);
+    }
+    assertArrayEquals(igushArray.toArray(), truthList.toArray());
+
 
     // remove random index until none left
     while (truthList.size() != 0) {
@@ -106,6 +119,10 @@ public class TestMethods {
     assertArrayEquals(igushArray.toArray(), truthList.toArray());
   }
 
+  @Test
+  public void testInitialization() {
+      igushArray = new IgushArray<>(100);
+  }
 
   @Test
   public void testAddAll() {
@@ -133,9 +150,7 @@ public class TestMethods {
     assertTrue(igushArray.addAll(0, list));
     truthList.addAll(0, list);
 
-    for (int i = 0; i < ADD_AMOUNT; i++) {
-      assertEquals(igushArray.get(i), truthList.get(i));
-    }
+    assertArrayEquals(igushArray.toArray(), truthList.toArray());
 
     // check others moved
     for (int i = ADD_AMOUNT; i < INITIAL_AMOUNT; i++) {
