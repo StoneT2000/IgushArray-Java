@@ -90,7 +90,7 @@ public class FixedDeque<E> extends ArrayList<E> {
       super.add(addIndex, element);
 
       //FIXME reduce code, too much constant factors
-      if (index == size()) {
+      if (index == size() - 1) {
         // adding to end
         end = (end + 1) % size(); // always moves up
         if (addIndex <= begin) {
@@ -150,6 +150,10 @@ public class FixedDeque<E> extends ArrayList<E> {
 
   // O(n)
   @Override
+  /**
+   * Removes normally, updates begin and end appropriately
+   * If we try to remove index 0, we swap the start and ending values and remove the end
+   */
   public E remove(int index) {
     rangeCheck(index);
 

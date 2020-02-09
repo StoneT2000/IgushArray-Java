@@ -1,174 +1,215 @@
-/**
- * MIT License
- *
- * Copyright (c) 2019 StoneT2000 (Stone Tao) email <stonezt2019@gmail.com>
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+import org.junit.Before;
+import org.junit.Test;
+import stonet2000.igusharray.IgushArray;
 
 import java.util.*;
-import stonet2000.igusharray.*;
+
+import static org.junit.Assert.*;
+
 public class TestMethods {
-  /**
-   * Integrity Testing for all methods. Use JUnit in future
-   */
-  public static void main(String args[]) throws Exception {
 
-    /*
-      Test class initialization
-     */
-    System.out.println("-- Testing class initialization --");
-    ArrayList<Integer> list = new ArrayList<>(10);
-    for (int i = 0; i < 10; i++) {
-      list.add(i);
+  static final int INITIAL_AMOUNT = 17; // amount of initial values in IgushArray for testing
+
+  static final int ADD_AMOUNT = 10; // amount of values to add for testing
+  static final int RANGE = 1000; // range of values to add, namely [-RANGE/2, RANGE/2]
+
+  static final boolean SIMPLE_VALUES = true; // flag for whether to populate a list with simple values for debugging
+
+  List<Integer> igushArray;
+  List<Integer> truthList;
+
+  @Before
+  public void setUp() {
+    igushArray = new IgushArray<>();
+    // this truthList should be the same as IgushArray if we apply the same methods on them
+    truthList = new ArrayList<>();
+
+    // add 0, 1, ..., INITIAL_AMOUNT to IgushArray if using SIMPLE_VALUES
+    // otherwise some random numbers
+    for (int i = 0; i < INITIAL_AMOUNT; i++) {
+      igushArray.add(i);
+      truthList.add(i);
     }
-    IgushArray<Integer> test = new IgushArray<>(list, 20);
-    compareLists(list, test);
-    if (test.capacity() != 20) throw new Exception("Capacity not correct");
-    test = new IgushArray<>(list);
-    compareLists(list, test);
-    test = new IgushArray<>(20);
-    test.add(10);
-    test.add(20);
-    test.remove(1);
-    list.add(10);
-    list.add(20);
-    list.remove(1);
+  }
 
-
-    /*
-    Test indexOf, lastIndexOf
-     */
-    System.out.println("-- Testing indexOf lastIndexOf --");
-    test = new IgushArray<>(20);
-    list = new ArrayList<>(20);
-    int randInt = (int) (Math.random() * 10000 - 5000);
-    for (int i = 0; i < 20; i++) {
-      if (i % 4 == 0) {
-        test.add(randInt);
-        list.add(randInt);
+  /**
+   * Populates a given list with ADD_AMOUNT of integers from the interval
+   * [RANGE/2, RANGE/2]
+   * @param list - the list to populate with random values
+   */
+  public void populateListWithIntegers(List<Integer> list) {
+    for (int i = 0; i < ADD_AMOUNT; i++) {
+      // TODO: Replace with seeded random number generator
+      if (SIMPLE_VALUES) {
+        // use simple values from INITIAL_AMOUNT + 100 to INITIAL_AMOUNT + 100 + ADD_AMOUNT
+        list.add(INITIAL_AMOUNT + 100 + i);
       }
       else {
-        test.add(i);
-        list.add(i);
+        list.add(randInt());
       }
     }
-    test.add(randInt);
-    list.add(randInt);
-    if(test.lastIndexOf(randInt) != list.lastIndexOf(randInt)) throw new Exception("lastIndexOf failed");
-    if(test.indexOf(randInt) != list.indexOf(randInt)) throw new Exception("indexOf failed");
-
-    /*
-    Test using collections method on IgushArray
-     */
-    System.out.println("-- Testing collections manipulation on lists --");
-    list = new ArrayList<>(100);
-    for (int i = 0; i < 10; i++) {
-      list.add(100 - i);
-    }
-    test = new IgushArray<>(list, 100);
-    Collections.sort(test);
-    Collections.reverse(test);
-    Collections.sort(list);
-    Collections.reverse(list);
-    compareLists(list, test);
-    Collections.max(test);
-
-    /*
-    Test addition, insertion, popping, pushing/addition, removal
-     */
-
-    test.add(100);
-    test.add(1043);
-    test.add(-142);
-    list.add(100);
-    list.add(1043);
-    list.add(-142);
-    compareLists(list, test);
-
-
-    test = new IgushArray<>(10);
-    list = new ArrayList<>(10);
-    for (int i = 0; i < 10; i++) {
-      test.add(0);
-      list.add(0);
-    }
-    list.add(1);
-    test.add(1); // ensure capacity
-
-    compareLists(list, test);
-
-    test = new IgushArray<>(20);
-    list = new ArrayList<>(20);
-    for (int i = 0; i < 20; i++) {
-      test.add(i);
-      list.add(i);
-    }
-    test.ensureCapacity(100);
-    list.ensureCapacity(100);
-    compareLists(list, test);
-    if (test.capacity() != 100) throw new Exception("Capacity not correct");
-
-    test = new IgushArray<>(12);
-    list = new ArrayList<>(12);
-    for (int i = 0; i < 12; i++) {
-      test.add(i);
-      list.add(i);
-    }
-    test.ensureCapacity(30);
-    list.ensureCapacity(30);
-    compareLists(list, test);
-
-    test = new IgushArray<>(11);
-    list = new ArrayList<>(11);
-    for (int i = 0; i < 11; i++) {
-      test.add(i);
-      list.add(i);
-    }
-    test.ensureCapacity(100);
-    list.ensureCapacity(100);
-    compareLists(list, test);
-
-    test = new IgushArray<>(10);
-    list = new ArrayList<>(10);
-    for (int i = 0; i < 10; i++) {
-      test.add(i);
-      list.add(i);
-    }
-    test.ensureCapacity(20);
-    list.ensureCapacity(20);
-    for (int i = 0; i < 4; i++) {
-      test.remove(4);
-      list.remove(4);
-    }
-    compareLists(list, test);
   }
 
-  public static void compareLists(List list1, List list2) throws Exception {
-    for (int i = 0; i < list1.size(); i++) {
-      if (!list1.get(i).equals(list2.get(i))) {
-        System.out.println("List 1: " + list1.toString());
-        System.out.println("List 2: " + list2.toString());
-        throw new Exception("Lists not equal");
-      }
+  public int randInt() {
+    return (int) (Math.random() * RANGE - RANGE / 2);
+  }
+
+  /**
+   * Returns random index of a list
+   * @param list
+   * @return
+   */
+  public int randomIndexInList(List list) {
+    return (int) (Math.random() * list.size());
+  }
+
+  @Test
+  public void testAdd() {
+    assertArrayEquals(igushArray.toArray(), truthList.toArray());
+    truthList.add(3);
+    assertFalse(Arrays.equals(igushArray.toArray(), truthList.toArray()));
+    igushArray.add(3);
+    assertArrayEquals(igushArray.toArray(), truthList.toArray());
+
+    igushArray = new IgushArray<>(INITIAL_AMOUNT + 100);
+    truthList = new ArrayList<>(INITIAL_AMOUNT + 100);
+
+    // add 0, 1, ..., INITIAL_AMOUNT to IgushArray if using SIMPLE_VALUES
+    // otherwise some random numbers
+    for (int i = 0; i < INITIAL_AMOUNT; i++) {
+      int rand = randInt();
+      igushArray.add(rand);
+      truthList.add(rand);
     }
-    System.out.println("Lists equal");
+    assertArrayEquals(igushArray.toArray(), truthList.toArray());
+  }
+
+  @Test
+  public void testRemove() {
+
+    // remove front index until empty
+    for (int i = 0; i < INITIAL_AMOUNT / 2; i++) {
+      int rand = randInt();
+      igushArray.remove(0);
+      truthList.remove(0);
+    }
+
+    assertArrayEquals(igushArray.toArray(), truthList.toArray());
+
+    // remove random index until none left
+    while (truthList.size() != 0) {
+      int index = randomIndexInList(truthList);
+      truthList.remove(index);
+      igushArray.remove(index);
+    }
+
+    assertArrayEquals(igushArray.toArray(), truthList.toArray());
+  }
+
+
+  @Test
+  public void testAddAll() {
+    assertFalse(igushArray.addAll(new ArrayList<>()));
+    ArrayList<Integer> list = new ArrayList<>();
+    populateListWithIntegers(list);
+    assertTrue(igushArray.addAll(list));
+
+    // check initial parts not changed
+    for (int i = 0; i < INITIAL_AMOUNT; i++) {
+      assertEquals(igushArray.get(i), (Integer) i);
+    }
+
+    // check that new list elements were added in correctly
+    for (int i = 0; i < ADD_AMOUNT; i++) {
+      assertEquals(igushArray.get(INITIAL_AMOUNT + i), list.get(i));
+    }
+  }
+
+  @Test
+  public void testAddAllWithIndex() {
+    assertFalse(igushArray.addAll(0, new LinkedList<>()));
+    ArrayList<Integer> list = new ArrayList<>();
+    populateListWithIntegers(list);
+    assertTrue(igushArray.addAll(0, list));
+    truthList.addAll(0, list);
+
+    for (int i = 0; i < ADD_AMOUNT; i++) {
+      assertEquals(igushArray.get(i), truthList.get(i));
+    }
+
+    // check others moved
+    for (int i = ADD_AMOUNT; i < INITIAL_AMOUNT; i++) {
+      assertEquals(igushArray.get(i), truthList.get(i));
+    }
 
   }
+
+  @Test
+  public void testRemoveAll() {
+    assertFalse(igushArray.removeAll(new HashSet<>()));
+    HashSet<Integer> hs = new HashSet<>();
+    hs.add(100);
+    hs.add(200);
+    assertFalse(igushArray.removeAll(hs));
+    igushArray.add(100);
+    igushArray.add(200);
+    assertTrue(igushArray.removeAll(hs));
+    assertFalse(igushArray.contains(100));
+    assertFalse(igushArray.contains(200));
+
+    // check nothing else was changed
+    for (int i = 0; i < 5; i++) {
+      assertEquals(igushArray.get(i), (Integer) i);
+    }
+  }
+
+  @Test
+  public void testRetainAll() {
+    List<Integer> hs = new LinkedList<>();
+    hs.add(100);
+    hs.add(200);
+    igushArray.add(100);
+    igushArray.add(200);
+
+    assertTrue(igushArray.retainAll(hs));
+    assertTrue(igushArray.contains(100));
+    assertTrue(igushArray.contains(200));
+
+    // check all others removed
+    for (int i = 0; i < INITIAL_AMOUNT; i++) {
+      assertFalse(igushArray.contains(i));
+    }
+
+    assertTrue(igushArray.retainAll(new HashSet<>())); // remove all
+    assertTrue(igushArray.isEmpty());
+  }
+
+  @Test
+  public void testContainsAll() {
+    HashSet<Integer> hs = new HashSet<>();
+    hs.add(1);
+    hs.add(4);
+    assertTrue(igushArray.containsAll(hs));
+    hs.add(100);
+    assertFalse(igushArray.containsAll(hs));
+  }
+
+  // Make removeRange public to use this test. (Don't forget to re-protect it after!)
+    /*
+    @Test
+    public void testRemoveRange() {
+        igushArray.removeRange(0, 5); //should remove items at indices 0-4 (remove everything)
+        assertTrue(igushArray.isEmpty());
+
+        for (int i = 0; i < 9; i++) {
+            igushArray.add(i);
+        }
+
+        igushArray.removeRange(2, 7); //remove 2,3,4,5,6
+        assertTrue(igushArray.contains(0));
+        assertTrue(igushArray.contains(1));
+        assertTrue(igushArray.contains(7));
+        assertTrue(igushArray.contains(8));
+    }
+    */
 }
