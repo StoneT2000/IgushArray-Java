@@ -155,18 +155,55 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
     int newDeqCapacity = (int) Math.pow(capacity, 0.5);
     int newLastDeqCapacity = capacity % newDeqCapacity;
     int newListCapacity = (int) Math.ceil((double) capacity / newDeqCapacity);
+
+    // FIXME might be a redundant check, see how ArrayList ensureCapacity is implemented
+    if (newListCapacity != listCapacity) {
+      // list capacity has changed, so we need to update data
+
+      if (data.get(listCapacity - 1).size() != deqCapacity) {
+        // new list capacity means old last FixedDeque needs to be of size deqCapacity
+
+        // TODO: Check if ensure capacity does the above comparison for us already
+        data.get(listCapacity - 1).ensureCapacity(deqCapacity);
+      }
+
+      data.ensureCapacity(newListCapacity);
+
+      // add new FixedDeques that are full (not partial capacity)
+      for (int i =  listCapacity; i < newListCapacity - 1; i++) {
+        data.add(new FixedDeque<>(deqCapacity));
+      }
+
+      lastDeqCapacity = newLastDeqCapacity;
+
+      if (lastDeqCapacity != 0) {
+        data.add(new FixedDeque<E>(lastDeqCapacity));
+      } else {
+        data.add(new FixedDeque<E>(deqCapacity));
+      }
+
+      listCapacity = newListCapacity;
+    }
+
+
+    // deq capacity changed, which implies list capacity must change
     if (newDeqCapacity != deqCapacity) {
-      // deq capacity changed, which implies list capacity must change
-      deqCapacity = newDeqCapacity;
+
+
 
       // go from 0 to listCapacity instead of listCapacity - 1 as list capacity must change, and the final fixedDeque
       // should now have normal deq size.
       for (int i = 0; i < listCapacity; i++) {
-        data.get(i).ensureCapacity(deqCapacity);
+        data.get(i).ensureCapacity(newDeqCapacity);
       }
       // now we have to shift all data down to fill in holes, fairly costly to do
 
-      int indexOfLastPartialFixedDeque = (int) Math.ceil((double) size() / newDeqCapacity);
+      // store index of the last partially filled fixed deque
+      int indexOfLastPartialFixedDeque = (int) Math.ceil(((double) size()) / newDeqCapacity);
+
+      // now update the deqCapacity
+      deqCapacity = newDeqCapacity;
+
       int j = 0;
 
       while (j < indexOfLastPartialFixedDeque) {
@@ -175,8 +212,8 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
         // keep filling FixedDeque at indice j until it is full. Pop from FixedDeque higherIndice until it is empty
         // before moving on to next FixedDeque to pop from.
         while (!data.get(j).isFull()) {
-          // data.get(j) fixedDeque has space left, fill it up with array data from next index.
 
+          // data.get(j) fixedDeque has space left, fill it up with array data from next index.
           if (data.get(higherIndice).isEmpty()) {
             higherIndice++;
             if (higherIndice > listCapacity - 1) {
@@ -191,30 +228,6 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
         j++;
       }
     }
-
-    //FIXME might be a redundant check, see how ArrayList ensureCapacity is implemented
-    if (newListCapacity != listCapacity) {
-
-      if (data.get(listCapacity - 1).size() != deqCapacity) {
-        // new list capacity means old last FixedDeque needs to be of size deqCapacity
-        data.get(listCapacity - 1).ensureCapacity(deqCapacity);
-      }
-
-      data.ensureCapacity(newListCapacity);
-      for (int i =  listCapacity; i < newListCapacity - 1; i++) {
-        data.add(new FixedDeque<>(deqCapacity));
-      }
-      lastDeqCapacity = newLastDeqCapacity;
-
-      if (lastDeqCapacity != 0) {
-        data.add(new FixedDeque<E>(lastDeqCapacity));
-      } else {
-        data.add(new FixedDeque<E>(deqCapacity));
-      }
-
-      listCapacity = newListCapacity;
-    }
-
 
   }
 

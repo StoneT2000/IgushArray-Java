@@ -5,18 +5,45 @@ import stonet2000.igusharray.IgushArray;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
 public class TestXAll {
+
+    static final int INITIAL_AMOUNT = 55; // amount of initial values in IgushArray for testing
+
+    static final int ADD_AMOUNT = 10; // amount of values to add for testing
+    static final int RANGE = 1000; // range of values to add, namely [-RANGE/2, RANGE/2]
+
+    static final boolean SIMPLE_VALUES = false; // flag for whether to populate a list with simple values for debugging
 
     IgushArray<Integer> ia;
 
     @Before
     public void setUp() {
         ia = new IgushArray<>();
-        for (int i = 0; i < 5; i++) {
+        // add 0, 1, ..., INITIAL_AMOUNT to IgushArray
+        for (int i = 0; i < INITIAL_AMOUNT; i++) {
             ia.add(i);
+        }
+    }
+
+    /**
+     * Populates a given list with ADD_AMOUNT of integers from the interval
+     * [RANGE/2, RANGE/2]
+     * @param list - the list to populate with random values
+     */
+    public void populateListWithIntegers(List<Integer> list) {
+        for (int i = 0; i < ADD_AMOUNT; i++) {
+            // TODO: Replace with seeded random number generator
+            if (SIMPLE_VALUES) {
+                // use simple values from INITIAL_AMOUNT + 100 to INITIAL_AMOUNT + 100 + ADD_AMOUNT
+                list.add(INITIAL_AMOUNT + 100 + i);
+            }
+            else {
+                list.add((int) (Math.random() * RANGE - RANGE / 2));
+            }
         }
     }
 
@@ -24,33 +51,34 @@ public class TestXAll {
     public void testAddAll() {
         assertFalse(ia.addAll(new ArrayList<>()));
         ArrayList<Integer> list = new ArrayList<>();
-        list.add(1234);
-        list.add(5678);
-        list.add(91011);
+        populateListWithIntegers(list);
         assertTrue(ia.addAll(list));
-        for (int i = 0; i < 5; i++) { //check parts not changed
+
+        // check initial parts not changed
+        for (int i = 0; i < INITIAL_AMOUNT; i++) {
             assertEquals(ia.get(i), (Integer) i);
         }
-        assertEquals(ia.get(5), (Integer) 1234);
-        assertEquals(ia.get(6), (Integer) 5678);
-        assertEquals(ia.get(7), (Integer) 91011);
+
+        // check that new list elements were added in correctly
+        for (int i = 0; i < ADD_AMOUNT; i++) {
+            assertEquals(ia.get(INITIAL_AMOUNT + i), list.get(i));
+        }
     }
 
     @Test
     public void testAddAllWithIndex() {
         assertFalse(ia.addAll(0, new LinkedList<>()));
         ArrayList<Integer> list = new ArrayList<>();
-        list.add(1234);
-        list.add(5678);
-        list.add(91011);
+        populateListWithIntegers(list);
         assertTrue(ia.addAll(0, list));
 
-        assertEquals(ia.get(0), (Integer) 1234);
-        assertEquals(ia.get(1), (Integer) 5678);
-        assertEquals(ia.get(2), (Integer) 91011);
+        for (int i = 0; i < ADD_AMOUNT; i++) {
+            assertEquals(ia.get(i), list.get(i));
+        }
 
-        for (int i = 3; i < 8; i++) { //check others moved
-            assertEquals(ia.get(i), (Integer) (i-3));
+        // check others moved
+        for (int i = ADD_AMOUNT; i < INITIAL_AMOUNT; i++) {
+            assertEquals(ia.get(i), (Integer) (i - ADD_AMOUNT));
         }
 
     }
@@ -67,7 +95,9 @@ public class TestXAll {
         assertTrue(ia.removeAll(hs));
         assertFalse(ia.contains(100));
         assertFalse(ia.contains(200));
-        for (int i = 0; i < 5; i++) { //check nothing else was changed
+
+        // check nothing else was changed
+        for (int i = 0; i < 5; i++) {
             assertEquals(ia.get(i), (Integer) i);
         }
     }
@@ -84,11 +114,12 @@ public class TestXAll {
         assertTrue(ia.contains(100));
         assertTrue(ia.contains(200));
 
-        for (int i = 0; i < 5; i++) { //check all others removed
+        // check all others removed
+        for (int i = 0; i < INITIAL_AMOUNT; i++) {
             assertFalse(ia.contains(i));
         }
 
-        assertTrue(ia.retainAll(new HashSet<>())); //remove all
+        assertTrue(ia.retainAll(new HashSet<>())); // remove all
         assertTrue(ia.isEmpty());
     }
 
