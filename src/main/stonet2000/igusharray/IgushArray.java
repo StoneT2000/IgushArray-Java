@@ -155,18 +155,55 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
     int newDeqCapacity = (int) Math.pow(capacity, 0.5);
     int newLastDeqCapacity = capacity % newDeqCapacity;
     int newListCapacity = (int) Math.ceil((double) capacity / newDeqCapacity);
+
+    // FIXME might be a redundant check, see how ArrayList ensureCapacity is implemented
+    if (newListCapacity != listCapacity) {
+      // list capacity has changed, so we need to update data
+
+      if (data.get(listCapacity - 1).size() != deqCapacity) {
+        // new list capacity means old last FixedDeque needs to be of size deqCapacity
+
+        // TODO: Check if ensure capacity does the above comparison for us already
+        data.get(listCapacity - 1).ensureCapacity(deqCapacity);
+      }
+
+      data.ensureCapacity(newListCapacity);
+
+      // add new FixedDeques that are full (not partial capacity)
+      for (int i =  listCapacity; i < newListCapacity - 1; i++) {
+        data.add(new FixedDeque<>(deqCapacity));
+      }
+
+      lastDeqCapacity = newLastDeqCapacity;
+
+      if (lastDeqCapacity != 0) {
+        data.add(new FixedDeque<E>(lastDeqCapacity));
+      } else {
+        data.add(new FixedDeque<E>(deqCapacity));
+      }
+
+      listCapacity = newListCapacity;
+    }
+
+
+    // deq capacity changed, which implies list capacity must change
     if (newDeqCapacity != deqCapacity) {
-      // deq capacity changed, which implies list capacity must change
-      deqCapacity = newDeqCapacity;
+
+
 
       // go from 0 to listCapacity instead of listCapacity - 1 as list capacity must change, and the final fixedDeque
       // should now have normal deq size.
       for (int i = 0; i < listCapacity; i++) {
-        data.get(i).ensureCapacity(deqCapacity);
+        data.get(i).ensureCapacity(newDeqCapacity);
       }
       // now we have to shift all data down to fill in holes, fairly costly to do
 
-      int indexOfLastPartialFixedDeque = (int) Math.ceil((double) size() / newDeqCapacity);
+      // store index of the last partially filled fixed deque
+      int indexOfLastPartialFixedDeque = (int) Math.ceil(((double) size()) / newDeqCapacity);
+
+      // now update the deqCapacity
+      deqCapacity = newDeqCapacity;
+
       int j = 0;
 
       while (j < indexOfLastPartialFixedDeque) {
@@ -175,8 +212,8 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
         // keep filling FixedDeque at indice j until it is full. Pop from FixedDeque higherIndice until it is empty
         // before moving on to next FixedDeque to pop from.
         while (!data.get(j).isFull()) {
-          // data.get(j) fixedDeque has space left, fill it up with array data from next index.
 
+          // data.get(j) fixedDeque has space left, fill it up with array data from next index.
           if (data.get(higherIndice).isEmpty()) {
             higherIndice++;
             if (higherIndice > listCapacity - 1) {
@@ -191,30 +228,6 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
         j++;
       }
     }
-
-    //FIXME might be a redundant check, see how ArrayList ensureCapacity is implemented
-    if (newListCapacity != listCapacity) {
-
-      if (data.get(listCapacity - 1).size() != deqCapacity) {
-        // new list capacity means old last FixedDeque needs to be of size deqCapacity
-        data.get(listCapacity - 1).ensureCapacity(deqCapacity);
-      }
-
-      data.ensureCapacity(newListCapacity);
-      for (int i =  listCapacity; i < newListCapacity - 1; i++) {
-        data.add(new FixedDeque<>(deqCapacity));
-      }
-      lastDeqCapacity = newLastDeqCapacity;
-
-      if (lastDeqCapacity != 0) {
-        data.add(new FixedDeque<E>(lastDeqCapacity));
-      } else {
-        data.add(new FixedDeque<E>(deqCapacity));
-      }
-
-      listCapacity = newListCapacity;
-    }
-
 
   }
 
@@ -483,42 +496,112 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
     size = 0;
   }
 
-
+  /**
+   * Appends all of the elements in the specified collection to end of this IgushArray,
+   * in the order that they are returned by the specified collection's Iterator
+   *
+   * @param c
+   * @return true if this IgushArray was modified
+   */
   @Override
   public boolean addAll(Collection<? extends E> c) {
-    //FIXME
-    return false;
+    Iterator<?> itr = c.iterator();
+    boolean flag = false;
+    while (itr.hasNext()) {
+        add((E) itr.next());
+        flag = true;
+    }
+    return flag;
   }
 
+  /**
+   * Inserts all of the elements in the specified collection into this IgushArray,
+   * starting at the specified position.
+   *
+   * @param c
+   * @return true if this IgushArray was modified
+   */
   @Override
   public boolean addAll(int index, Collection<? extends E> c) {
-    //FIXME
-    return false;
+    Iterator<?> itr = c.iterator();
+    while (itr.hasNext()) {
+        add(index, (E) itr.next());
+        index++;
+    }
+    return c.size() > 0;
   }
 
+  /**
+   * Removes from this IgushArray all elements that are contained in the
+   * specified collection.
+   *
+   * @param c
+   * @return true if this IgushArray was modified
+   */
   @Override
   public boolean removeAll(Collection<?> c) {
-    //FIXME
-    return false;
+    Iterator<?> itr = c.iterator();
+    boolean flag = false;
+    while (itr.hasNext()) {
+        Object o = itr.next();
+        if (contains(o)) {
+            remove(o);
+            flag = true;
+        }
+    }
+    return flag;
   }
 
+  /**
+   * Retains only the elements in this IgushArray that are contained in the
+   * specified collection.
+   *
+   * @param c
+   * @return true if this IgushArray was modified
+   */
   @Override
   public boolean retainAll(Collection<?> c) {
-    //FIXME
-    return false;
+    // FIXME optimize performance
+    HashSet<Object> hs = new HashSet<>();
+    for (int i = 0; i < size; i++) {
+        Object o = get(i);
+        if (!c.contains(o)) {
+            hs.add(o);
+        }
+    }
+
+    boolean flag = removeAll(hs);
+
+    return flag;
   }
 
+  /**
+   * Returns true if this IgushArray contains all elements of the specified collection
+   *
+   * @param c
+   * @return
+   */
   @Override
   public boolean containsAll(Collection<?> c) {
-    return false;
+    Iterator<?> it = c.iterator();
+    boolean result = true;
+    while (it.hasNext()) {
+        if (!contains(it.next())) {
+            result = false;
+            break;
+        }
+    }
+    return result;
   }
 
-  //FIXME might not be right
+
   @Override
   protected void removeRange(int fromIndex, int toIndex) {
-    for (int i = fromIndex; i <= toIndex; i++) {
-      remove(fromIndex);
+    HashSet<Object> hs = new HashSet<>();
+    for (int i = fromIndex; i < toIndex; i++) {
+      hs.add(get(i));
     }
+    removeAll(hs);
   }
 
   // Only used when we add/insert an element usually
