@@ -104,7 +104,7 @@ public class TestXAll {
 
     @Test
     public void testRetainAll() {
-        LinkedList<Integer> hs = new LinkedList<>();
+        List<Integer> hs = new LinkedList<>();
         hs.add(100);
         hs.add(200);
         ia.add(100);
