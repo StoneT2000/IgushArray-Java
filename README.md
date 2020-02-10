@@ -21,53 +21,49 @@ More details on the general idea, motivation etc. can be found [here](https://gi
 
 # Performance Tests
 
-The performance tests are shown below. The test code is in **src/Test.Java**. 
+The performance tests are shown below. The benchmarking code and parameters can be found in **src/main/test/Benchmarking.Java**. 
 
-All operations are performed a 1,000 times and 50 trials unless otherwise noted.
-
-All results are in milliseconds and are the averages.
+Note, all timings are in milliseconds. The Java Microbench Harness library was used from openjdk to benchmark the code and compare with ArrayList
 
 ## Access by Index
 
-In this test, random indices were accessed 100,000 times for 50 trials.
+The results shown are the results of accessing random indices 1,000,000 times.
 
 It can be seen that the IgushArray maintains **O(1)** access time complexity, equivalent to ArrayList. However, there is a little extra overhead with the get operation and access times are longer, but still constant.
 
-| List Size and Capacity | IgushArray | ArrayList |
-| ---------------------- | ---------- | --------- |
-| 1,000                  | 2.04       | 1.10      |
-| 10,000                 | 1.78       | 0.94      |
-| 100,000                | 1.96       | 0.96      |
-| 1,000,000              | 2.02       | 0.96      |
-| 10,000,000             | 2.68       | 0.96      |
+| List Size and Capacity | IgushArray     | ArrayList      |
+| ---------------------- | -------------- | -------------- |
+| 1,000                  | 96.174 ± 2.247 | 29.222 ± 0.971 |
+| 10,000                 | 96.179 ± 1.747 | 29.054 ± 0.633 |
+| 100,000                | 97.847 ± 3.720 | 28.907 ± 0.611 |
+| 1,000,000              | 98.262 ± 5.650 | 29.132 ± 0.690 |
 
 ## Insertion / Push Front
 
-Lists were initialized to a capacity of 10^k and initialized to a size of 10^k - 1000. The 1000 insertion/add operations that added values to the front of the lists then filled the lists to size 10^k.
+The results shown are the result of inserting 1000 elements to the front of the array, without needing to increase capacity of the arrays. In particular, the lists were initialized to a capacity of 10^k, initialized to a size of 10^k - 1000, then insertions were performed to fill the list to capacity.
 
 It can be seen that for larger lists, IgushArray out performs the ArrayList by a massive amount.
 
-| List Size and Capacity | IgushArray | ArrayList |
-| ---------------------- | ---------- | --------- |
-| 1,000                  | 0.60       | 0.12      |
-| 10,000                 | 1.34       | 0.72      |
-| 100,000                | 4.56       | 13.04     |
-| 1,000,000              | 20.10      | 124.84    |
-| 10,000,000             | 89.54      | 5790.44   |
+| List Size and Capacity | IgushArray     | ArrayList           |
+| ---------------------- | -------------- | ------------------- |
+| 1,000                  | 0.504 ± 0.017  | 0.123 ± 0.004       |
+| 10,000                 | 1.302 ± 0.028  | 0.825 ± 0.025       |
+| 100,000                | 4.408 ± 0.063  | 10.478 ± 1.591      |
+| 1,000,000              | 28.194 ± 3.392 | 230.084 ± 26.017    |
+| 10,000,000             | 91.762 ± 4.132 | 12415.907 ± 451.443 |
 
 ## Remove Front
 
-Each list was initialized to a size and capacity of 10^k. The 1000 remove front operations performed then reduced their sizes down to 10^k - 1000. In Java, removing the front is equivalent to `ArrayList.remove(0)`
+The results shown are the result of removing the front element 1000 times. In particular, the lists were initialized to a capacity of 10^k, initialized to a size of 10^k, then 1000 removals from the front were performed.
 
 It can be seen that for larger lists, IgushArray out performs the ArrayList by a massive amount.
 
-| List Capacity | IgushArray | ArrayList |
-| ------------- | ---------- | --------- |
-| 1,000         | 0.52       | 0.06      |
-| 10,000        | 1.12       | 0.76      |
-| 100,000       | 4.12       | 10.68     |
-| 1,000,000     | 22.04      | 123.42    |
-| 10,000,000    | 93.82      | 3284.22   |
+| List Capacity | IgushArray     | ArrayList        |
+| ------------- | -------------- | ---------------- |
+| 1,000         | 0.267 ± 0.011  | 0.060 ± 0.004    |
+| 10,000        | 1.199 ± 0.022  | 0.836 ± 0.126    |
+| 100,000       | 4.112 ± 0.056  | 13.253 ± 1.699   |
+| 1,000,000     | 22.776 ± 1.197 | 189.594 ± 10.297 |
 
 # Implementation
 

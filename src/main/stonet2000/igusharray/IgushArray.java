@@ -55,20 +55,13 @@ public class IgushArray<E> extends AbstractList<E> implements List<E>, RandomAcc
    */
   public IgushArray(int initialCapacity) {
     capacity = initialCapacity;
-    if (capacity < 0)
+    if (capacity <= 0)
       throw new IllegalArgumentException("Illegal Capacity: " + capacity);
 
     deqCapacity = (int) Math.pow(capacity, 0.5);
     lastDeqCapacity = capacity % deqCapacity;
     listCapacity = (int) Math.ceil((double) capacity / deqCapacity);
-
-    /*
-    System.out.println("New Igush Array: \nCapacity: " + capacity +
-            " | listCapacity: " + listCapacity +
-            " | deqCapacity: " + deqCapacity +
-            " | lastDeqCapacity: " + lastDeqCapacity);
-
-    */
+    
     data = new ArrayList<>(listCapacity);
     for (int i = 0; i < listCapacity - 1; i++) {
       data.add(new FixedDeque<E>(deqCapacity));
